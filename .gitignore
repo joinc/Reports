@@ -1,5 +1,6 @@
 .idea
 Main/migrations
+Main/__pycache__
 Reports/__pycache__
 Main\migrations
 Reports\__pycache__

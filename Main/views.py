@@ -8,7 +8,7 @@ from django.contrib.auth import login, logout
 from django.views.generic.edit import FormView
 from django.conf import settings
 from Main.models import Reports, Columns, Cells
-from .forms import FormReport
+from .forms import FormReport, FormColumn
 
 ######################################################################################################################
 
@@ -57,7 +57,8 @@ def report_create(request):
 
     report_form = FormReport()
     breadcrumb = 'Создание таблицы отчета'
-    return render(request, 'reports.html', {'report_form': report_form, 'breadcrumb': breadcrumb, })
+    return render(request, 'reports.html',
+                  {'report_form': report_form, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
@@ -74,6 +75,7 @@ def report_save(request):
         report.TitleShort = report_title_short
         report.TitleLong = report_title_long
         report.save()
+        return HttpResponseRedirect(reverse('column_create', args=(report.id,)))
 
     return HttpResponseRedirect(reverse('index'))
 
@@ -86,7 +88,39 @@ def report_view(request, report_id):
         return HttpResponseRedirect(reverse('login'))
 
     report = get_object_or_404(Reports, id=report_id)
-    columnlist = Columns.objects.filter(ReportID=report)
-    breadcrumb = 'Отчет ' + report.TitleShort
-    return render(request, 'report.html', {'report': report, 'columnlist':columnlist, 'breadcrumb': breadcrumb, })
+    column_list = Columns.objects.filter(ReportID=report)
+    breadcrumb = 'Просмотр отчета "' + report.TitleShort + '"'
+    return render(request, 'report.html',
+                  {'report': report, 'column_list': column_list, 'breadcrumb': breadcrumb, })
+
+######################################################################################################################
+
+
+def column_create(request, report_id):
+
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(reverse('index'))
+
+    report = get_object_or_404(Reports, id=report_id)
+    column_list = Columns.objects.filter(ReportID=report)
+    column_form = FormColumn()
+    breadcrumb = 'Создание столбца таблицы отчета'
+    return render(request, 'columns.html',
+                  {'report': report, 'column_list': column_list, 'column_form': column_form, 'breadcrumb': breadcrumb, })
+
+######################################################################################################################
+
+
+def column_save(request):
+
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(reverse('index'))
+
+    if request.POST:
+        column_title = request.POST['column_title']
+        column = Columns()
+        column.Title = column_title
+        column.save()
+
+    return HttpResponseRedirect(reverse('index'))
 

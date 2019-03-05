@@ -6,10 +6,46 @@
 {% block html_body %}
     <br />
     <div class="container-fluid">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
-        </ol>
-        {{ report.TitleLong }}
+        <div class="row">
+            <div class="col-auto mr-auto">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+                    <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
+                </ol>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-outline-warning" href="{% url 'column_create' report.id %}" role="button">Редактировать</a>
+            </div>
+        </div>
+        <h2>{{ report.TitleLong }}</h2>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">First</th>
+                    <th scope="col">Last</th>
+                    <th scope="col">Handle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td><input type="text" class="form-control" id="formGroupExampleInput"></td>
+                    <td><input type="text" class="form-control" id="formGroupExampleInput"></td>
+                    <td><input type="text" class="form-control" id="formGroupExampleInput"></td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Jacob</td>
+                    <td>Thornton</td>
+                    <td>@fat</td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td colspan="2">Larry the Bird</td>
+                    <td>@twitter</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 {% endblock %}

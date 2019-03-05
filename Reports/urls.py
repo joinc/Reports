@@ -25,6 +25,8 @@ urlpatterns = [
     path('report/create/', views.report_create, name='report_create', ),
     path('report/save/', views.report_save, name='report_save', ),
     path('report/<int:report_id>/', views.report_view, name='report_view', ),
+    path('report/<int:report_id>/column/create/', views.column_create, name='column_create', ),
+    path('report/<int:report_id>/column/save/', views.column_save, name='column_save', ),
     path('login/', views.LoginFormView.as_view(), name='login', ),
     path('logout/', views.logout_view, name='logout', ),
 ]

@@ -16,10 +16,10 @@
         </div>
         <form method='post' action='{% url 'report_save' %}'>
             <div class="input-group mb-3">
-                {{ report_form }}
+                {{ column_form }}
                 {% csrf_token %}
                 <div class="input-group-append">
-                    <button class="btn btn-info" type="submit">Создать</button>
+                    <button class="btn btn-info" type="submit">Добавить</button>
                 </div>
             </div>
         </form>

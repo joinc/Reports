@@ -10,12 +10,23 @@ class FormReport(forms.Form):
 
     report_title_short = forms.CharField(
         label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите краткое наименование', 'size': '40', }),
+        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите краткое наименование', }),
         required=False,
     )
 
     report_title_long = forms.CharField(
         label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите полное наименование', 'size': '60', }),
+        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите полное наименование', }),
+        required=False,
+    )
+
+######################################################################################################################
+
+
+class FormColumn(forms.Form):
+
+    column_title = forms.CharField(
+        label='',
+        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите наименование столбца', }),
         required=False,
     )

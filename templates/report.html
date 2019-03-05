@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static from staticfiles %}
+
+{% block html_title %}{{ breadcrumb }}{% endblock %}
+
+{% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
+        </ol>
+        {{ report.TitleLong }}
+    </div>
+{% endblock %}

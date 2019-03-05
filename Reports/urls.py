@@ -22,6 +22,9 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index', ),
+    path('report/create/', views.report_create, name='report_create', ),
+    path('report/save/', views.report_save, name='report_save', ),
+    path('report/<int:report_id>/', views.report_view, name='report_view', ),
     path('login/', views.LoginFormView.as_view(), name='login', ),
     path('logout/', views.logout_view, name='logout', ),
 ]

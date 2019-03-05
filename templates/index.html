@@ -1,7 +1,23 @@
 {% extends "base.html" %}
 {% load i18n %}{% load static from staticfiles %}
 
-{% block html_title %}Index.html{% endblock %}
+{% block html_title %}Главная{% endblock %}
 
 {% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <div class="card-columns">
+            {% for report in report_list %}
+	            <div class="shadow card border-dark mb-3">
+		            <div class="card-body">
+		                <h5 class="card-title">{{ report.TitleShort }}</h5>
+		                <p class="card-text">{{ report.TitleLong }}</p>
+		            </div>
+                    <div class="card-footer text-muted">
+                        <a href="{% url 'report_view' report.id %}" class="btn btn-warning">Перейти</a>
+                    </div>
+	            </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}

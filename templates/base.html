@@ -10,7 +10,6 @@
     {% block html_head %}{% endblock %}
     <script src='{% static "js/jquery.slim.min.js" %}'></script>
     <script src='{% static "js/popper.min.js" %}'></script>
-    <script src='{% static "js/moment.ru.min.js" %}'></script>
     <script src='{% static "js/bootstrap.min.js" %}'></script>
 </head>
 <body>
@@ -22,10 +21,10 @@
                 <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">☰</button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <span class="dropdown-item"><strong>{% firstof user.get_full_name user.get_short_name user.get_username %}</strong></span>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item bg-danger text-white">Список пользователей</a>
-                    <a href="#" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
-                    <a href="#" class="dropdown-item bg-danger text-white">Отправить почту</a>
+                    {% if request.user.is_superuser %}
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'report_create' %}" class="dropdown-item bg-danger text-white">Создать таблицу отчета</a>
+                    {% endif %}
                     <div class="dropdown-divider"></div>
                     <a href="#" class="dropdown-item">Уведомления</a>
                     <div class="dropdown-divider"></div>

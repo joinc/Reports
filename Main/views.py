@@ -7,18 +7,22 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from django.views.generic.edit import FormView
 from django.conf import settings
-
+from Main.models import Reports, Columns, Cells
+from .forms import FormReport
 
 ######################################################################################################################
+
 
 def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
-    return render(request, 'index.html', {})
-
+    report_list = Reports.objects.all()
+    report_count = report_list.count()
+    return render(request, 'index.html', {'report_list': report_list, 'report_count': report_count, })
 
 ######################################################################################################################
+
 
 class LoginFormView(FormView):
     form_class = AuthenticationForm
@@ -36,9 +40,53 @@ class LoginFormView(FormView):
 
         return super(LoginFormView, self).form_valid(form)
 
-
 ######################################################################################################################
+
 
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
+
+######################################################################################################################
+
+
+def report_create(request):
+
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(reverse('index'))
+
+    report_form = FormReport()
+    breadcrumb = 'Создание таблицы отчета'
+    return render(request, 'reports.html', {'report_form': report_form, 'breadcrumb': breadcrumb, })
+
+######################################################################################################################
+
+
+def report_save(request):
+
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(reverse('index'))
+
+    if request.POST:
+        report_title_short = request.POST['report_title_short']
+        report_title_long = request.POST['report_title_long']
+        report = Reports()
+        report.TitleShort = report_title_short
+        report.TitleLong = report_title_long
+        report.save()
+
+    return HttpResponseRedirect(reverse('index'))
+
+######################################################################################################################
+
+
+def report_view(request, report_id):
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    report = get_object_or_404(Reports, id=report_id)
+    columnlist = Columns.objects.filter(ReportID=report)
+    breadcrumb = 'Отчет ' + report.TitleShort
+    return render(request, 'report.html', {'report': report, 'columnlist':columnlist, 'breadcrumb': breadcrumb, })
+

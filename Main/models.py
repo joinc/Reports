@@ -31,7 +31,7 @@ class Columns(models.Model):
         return '{0}'.format(self.Title)
 
     class Meta:
-        ordering = 'Title',
+        ordering = 'CreateDate',
         verbose_name = 'Столбец'
         verbose_name_plural = 'Столбцы'
         managed = True
@@ -40,7 +40,7 @@ class Columns(models.Model):
 ######################################################################################################################
 
 class Cells(models.Model):
-    Value = models.DecimalField(verbose_name='Значение', max_digits=19, decimal_places=2, null=True, default=None, )
+    Value = models.CharField('Значение', max_length=10, default='', )
     ColumnID = models.ForeignKey(Columns, verbose_name='Столбец', null=False, related_name='ColumnID', on_delete=models.
                                  CASCADE, )
     Owner = models.ForeignKey(User, verbose_name='Владелец ячейки', null=True, related_name='Owner', on_delete=models.

@@ -106,21 +106,46 @@ def column_create(request, report_id):
     column_form = FormColumn()
     breadcrumb = 'Создание столбца таблицы отчета'
     return render(request, 'columns.html',
-                  {'report': report, 'column_list': column_list, 'column_form': column_form, 'breadcrumb': breadcrumb, })
+                  {'report': report, 'column_list': column_list, 'column_form': column_form,
+                   'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
 
-def column_save(request):
+def column_save(request, report_id):
 
     if not request.user.is_superuser:
         return HttpResponseRedirect(reverse('index'))
 
+    report = get_object_or_404(Reports, id=report_id)
     if request.POST:
         column_title = request.POST['column_title']
         column = Columns()
         column.Title = column_title
+        column.ReportID = report
         column.save()
+        return HttpResponseRedirect(reverse('column_create', args=(report.id,)))
 
     return HttpResponseRedirect(reverse('index'))
 
+######################################################################################################################
+
+
+def cell_save(request, report_id):
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    report = get_object_or_404(Reports, id=report_id)
+    if request.POST:
+        column_list = Columns.objects.filter(ReportID=report)
+        for column in column_list:
+            cell_value = request.POST['column'+column.id.__str__()]
+            cell = Cells()
+            cell.ColumnID = column
+            cell.Value = cell_value
+            cell.Owner = request.user
+            cell.save()
+        return HttpResponseRedirect(reverse('report_view', args=(report.id,)))
+
+    return HttpResponseRedirect(reverse('index'))

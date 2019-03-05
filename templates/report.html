@@ -18,32 +18,25 @@
             </div>
         </div>
         <h2>{{ report.TitleLong }}</h2>
-        <table class="table table-hover">
+        <table class="table table-hover table-sm">
             <thead>
                 <tr>
+                    <th scope="col">Наименование ответственного</th>
+                    {% for column in column_list %}
+                        <th scope="col">{{ column.Title }}</th>
+                    {% endfor %}
                     <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <th scope="row">1</th>
-                    <td><input type="text" class="form-control" id="formGroupExampleInput"></td>
-                    <td><input type="text" class="form-control" id="formGroupExampleInput"></td>
-                    <td><input type="text" class="form-control" id="formGroupExampleInput"></td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
+                    <form method='post' action='{% url 'cell_save' report.id %}'>
+                        <th scope="row">{% firstof user.get_full_name user.get_short_name user.get_username %}</th>
+                        {% for column in column_list %}
+                            <td><input type="text" class="form-control" name="column{{ column.id }}"></td>
+                        {% endfor %}
+                        <td>{% csrf_token %}<button class="btn btn-success" type="submit">Сохранить</button></td>
+                    </form>
                 </tr>
             </tbody>
         </table>

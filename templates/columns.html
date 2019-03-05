@@ -14,7 +14,17 @@
                 </ol>
             </div>
         </div>
-        <form method='post' action='{% url 'report_save' %}'>
+        <h2>{{ report.TitleLong }}</h2>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    {% for column in column_list %}
+                        <th scope="col">{{ column.Title }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+        </table>
+        <form method='post' action='{% url 'column_save' report.id %}'>
             <div class="input-group mb-3">
                 {{ column_form }}
                 {% csrf_token %}

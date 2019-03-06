@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 ######################################################################################################################
 
+
 class Reports(models.Model):
     TitleShort = models.CharField('Краткое наименование', max_length=64, default='', )
     TitleLong = models.CharField('Полное наименование', max_length=1024, default='', )
@@ -18,13 +19,13 @@ class Reports(models.Model):
         verbose_name_plural = 'Отчеты'
         managed = True
 
-
 ######################################################################################################################
+
 
 class Columns(models.Model):
     Title = models.CharField('Наименование', max_length=64, default='', )
-    ReportID = models.ForeignKey(Reports, verbose_name='Отчет', null=False, related_name='ReportID', on_delete=models.
-                                 CASCADE, )
+    ReportID = models.ForeignKey(Reports, verbose_name='Отчет', null=False, related_name='ColumnReportID',
+                                 on_delete=models.CASCADE, )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
@@ -36,15 +37,35 @@ class Columns(models.Model):
         verbose_name_plural = 'Столбцы'
         managed = True
 
+######################################################################################################################
+
+
+class Lines(models.Model):
+    ReportID = models.ForeignKey(Reports, verbose_name='Отчет', null=False, related_name='LineReportID',
+                                 on_delete=models.CASCADE, )
+    CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
+
+    def __str__(self):
+        return '{0}'.format(self.ReportID.TitleShort)
+
+    class Meta:
+        ordering = 'CreateDate',
+        verbose_name = 'Строка'
+        verbose_name_plural = 'Строки'
+        managed = True
 
 ######################################################################################################################
 
+
 class Cells(models.Model):
+
     Value = models.CharField('Значение', max_length=10, default='', )
-    ColumnID = models.ForeignKey(Columns, verbose_name='Столбец', null=False, related_name='ColumnID', on_delete=models.
-                                 CASCADE, )
-    Owner = models.ForeignKey(User, verbose_name='Владелец ячейки', null=True, related_name='Owner', on_delete=models.
-                              SET_NULL, )
+    ColumnID = models.ForeignKey(Columns, verbose_name='Столбец', null=False, related_name='ColumnID',
+                                 on_delete=models.CASCADE, )
+    LineID = models.ForeignKey(Lines, verbose_name='Строка', null=False, related_name='LineID',
+                               on_delete=models.CASCADE, )
+    Owner = models.ForeignKey(User, verbose_name='Владелец ячейки', null=True, related_name='Owner',
+                              on_delete=models.SET_NULL, )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):

@@ -24,6 +24,7 @@
                     {% if request.user.is_superuser %}
                         <div class="dropdown-divider"></div>
                         <a href="{% url 'report_create' %}" class="dropdown-item bg-danger text-white">Создать таблицу отчета</a>
+                        <a href="{% url 'reports_list' %}" class="dropdown-item bg-danger text-white">Список таблиц</a>
                     {% endif %}
                     <div class="dropdown-divider"></div>
                     <a href="#" class="dropdown-item">Уведомления</a>

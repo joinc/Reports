@@ -14,7 +14,7 @@
                 </ol>
             </div>
         </div>
-        <form method='post' action='{% url 'report_save' %}'>
+        <form method='post' action='{% url 'report_create' %}'>
             <div class="input-group mb-3">
                 {{ report_form }}
                 {% csrf_token %}

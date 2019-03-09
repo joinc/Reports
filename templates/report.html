@@ -14,7 +14,7 @@
                 </ol>
             </div>
             <div class="col-auto">
-                <a class="btn btn-outline-warning" href="{% url 'column_create' report.id %}" role="button">Редактировать</a>
+                <a class="btn btn-outline-warning" href="{% url 'report_edit' report.id %}" role="button">Редактировать</a>
             </div>
         </div>
         <h2>{{ report.TitleLong }}</h2>
@@ -29,6 +29,20 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <th scope="row">{% firstof user.get_full_name user.get_short_name user.get_username %}</th>
+                    {% for column in column_list %}
+                        <td>{{ column.id }}</td>
+                    {% endfor %}
+                    <td>{% csrf_token %}<button class="btn btn-success" type="submit">Сохранить</button></td>
+                </tr>
+                <tr>
+                    <th scope="row">Итого:</th>
+                    {% for column in column_list %}
+                        <td>1</td>
+                    {% endfor %}
+                    <td></td>
+                </tr>
                 <tr>
                     <form method='post' action='{% url 'cell_save' report.id %}'>
                         <th scope="row">{% firstof user.get_full_name user.get_short_name user.get_username %}</th>

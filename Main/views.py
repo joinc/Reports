@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
 from django.views.generic.edit import FormView
 from django.conf import settings
 from Main.models import Reports, Columns, Lines, Cells
@@ -17,9 +18,11 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
-    report_list = Reports.objects.filter(Published=True)
-    report_count = report_list.count()
-    return render(request, 'index.html', {'report_list': report_list, 'report_count': report_count, })
+    if request.user.is_superuser:
+        report_list = Reports.objects.all()
+    else:
+        report_list = Reports.objects.filter(Published=True)
+    return render(request, 'index.html', {'report_list': report_list, })
 
 ######################################################################################################################
 
@@ -117,9 +120,49 @@ def report_view(request, report_id):
 
     report = get_object_or_404(Reports, id=report_id)
     column_list = Columns.objects.filter(ReportID=report)
+    if request.user.is_superuser:
+        return HttpResponseRedirect(reverse('report_total', args=(report.id,)))
+    else:
+        line_list = Lines.objects.filter(ReportID=report).filter(Editor=request.user)
+        cell_list = []
+        for line in line_list:
+            cells = Cells.objects.filter(LineID=line).filter(Owner=request.user)
+            cell_list.append(cells)
+
     breadcrumb = 'Просмотр таблицы "' + report.TitleShort + '"'
     return render(request, 'report.html',
-                  {'report': report, 'column_list': column_list, 'breadcrumb': breadcrumb, })
+                  {'report': report, 'column_list': column_list, 'line_list': line_list, 'cell_list': cell_list,
+                   'breadcrumb': breadcrumb, })
+
+######################################################################################################################
+
+
+def report_total(request, report_id):
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    report = get_object_or_404(Reports, id=report_id)
+    if request.user.is_superuser:
+        column_list = Columns.objects.filter(ReportID=report)
+        user_list = []
+        line_list = []
+        for owner in User.objects.all():
+            lines = Lines.objects.filter(ReportID=report).filter(Editor=owner)
+            if lines.count() > 0:
+                cell_list = []
+                for line in lines:
+                    cells = Cells.objects.filter(LineID=line)
+                    cell_list.append(cells)
+                line_list.append(cell_list)
+                user_list.append(owner)
+    else:
+        return HttpResponseRedirect(reverse('report_view', args=(report.id,)))
+
+    breadcrumb = 'Сводная таблицы "' + report.TitleShort + '"'
+    return render(request, 'report_total.html',
+                  {'report': report, 'column_list': column_list, 'line_list': line_list, 'cell_list': cell_list,
+                   'user_list': user_list, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
@@ -135,19 +178,7 @@ def report_publish(request, report_id):
     else:
         report.Published = False
     report.save()
-    return HttpResponseRedirect(reverse('reports_list'))
-
-######################################################################################################################
-
-
-def reports_list(request):
-
-    if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
-
-    report_list = Reports.objects.all()
-    breadcrumb = 'Список таблиц'
-    return render(request, 'reports_list.html', {'report_list': report_list, 'breadcrumb': breadcrumb, })
+    return HttpResponseRedirect(reverse('index'))
 
 ######################################################################################################################
 
@@ -167,6 +198,19 @@ def column_save(request, report_id):
         return HttpResponseRedirect(reverse('report_edit', args=(report.id,)))
 
     return HttpResponseRedirect(reverse('index'))
+
+######################################################################################################################
+
+
+def column_delete(request, column_id):
+
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(reverse('index'))
+
+    column = get_object_or_404(Columns, id=column_id)
+    report_id = column.ReportID.id
+    column.delete()
+    return HttpResponseRedirect(reverse('report_edit', args=(report_id,)))
 
 ######################################################################################################################
 

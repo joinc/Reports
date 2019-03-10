@@ -53,10 +53,10 @@ class Lines(models.Model):
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
-        return '{0}'.format(self.ReportID.TitleShort)
+        return '{0}.{1}'.format(self.id, self.ReportID.TitleShort)
 
     class Meta:
-        ordering = 'CreateDate',
+        ordering = 'Editor', '-CreateDate',
         verbose_name = 'Строка'
         verbose_name_plural = 'Строки'
         managed = True

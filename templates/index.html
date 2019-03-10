@@ -14,7 +14,14 @@
 		                <p class="card-text">{{ report.TitleLong }}</p>
 		            </div>
                     <div class="card-footer text-muted">
-                        <a href="{% url 'report_view' report.id %}" class="btn btn-warning">Перейти</a>
+                        {% if request.user.is_superuser %}
+                            <a href="{% url 'report_view' report.id %}" class="btn btn-warning">Перейти</a>
+                            <a href="{% url 'report_edit' report.id %}" class="btn btn-info">Редактировать</a>
+                            {% if report.Published %}<a href="{% url 'report_publish' report.id %}" class="btn btn-warning">Снять с публикации</a>{% endif %}
+                            {% if not report.Published %}<a href="{% url 'report_publish' report.id %}" class="btn btn-success">Опубликовать</a>{% endif %}
+                        {% else %}
+                            <a href="{% url 'report_view' report.id %}" class="btn btn-warning">Перейти</a>
+                        {% endif %}
                     </div>
 	            </div>
             {% endfor %}

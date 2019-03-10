@@ -5,6 +5,11 @@
 
 {% block html_body %}
     <br />
+    <script>
+        $(document).ready(function() {
+            $('[id=numeric]').bind("change keyup input click", function() {if (this.value.match(/[^0-9\.]/g)) {this.value = this.value.replace(/[^0-9\.]/g, '');}});
+        });
+    </script>
     <div class="container-fluid">
         <div class="row">
             <div class="col-auto mr-auto">
@@ -14,45 +19,71 @@
                 </ol>
             </div>
             <div class="col-auto">
-                <a class="btn btn-outline-warning" href="{% url 'report_edit' report.id %}" role="button">Редактировать</a>
+                {% if request.user.is_superuser %}
+                    <a class="btn btn-outline-info" href="{% url 'report_edit' report.id %}" role="button">Редактировать</a>
+                {% endif %}
             </div>
         </div>
-        <h2>{{ report.TitleLong }}</h2>
-        <table class="table table-hover table-sm">
-            <thead>
-                <tr>
-                    <th scope="col">Наименование ответственного</th>
-                    {% for column in column_list %}
-                        <th scope="col">{{ column.Title }}</th>
-                    {% endfor %}
-                    <th scope="col">#</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th scope="row">{% firstof user.get_full_name user.get_short_name user.get_username %}</th>
-                    {% for column in column_list %}
-                        <td>{{ column.id }}</td>
-                    {% endfor %}
-                    <td>{% csrf_token %}<button class="btn btn-success" type="submit">Сохранить</button></td>
-                </tr>
-                <tr>
-                    <th scope="row">Итого:</th>
-                    {% for column in column_list %}
+        <div class="shadow p-3 mb-5 bg-white rounded">
+            <h2>{{ report.TitleLong }}</h2>
+            <table class="table table-hover table-sm table-bordered">
+                <thead class="bg-info text-white">
+                    {% autoescape off %}{{ report.Header }}{% endautoescape %}
+                    <tr>
                         <td>1</td>
-                    {% endfor %}
-                    <td></td>
-                </tr>
-                <tr>
-                    <form method='post' action='{% url 'cell_save' report.id %}'>
-                        <th scope="row">{% firstof user.get_full_name user.get_short_name user.get_username %}</th>
                         {% for column in column_list %}
-                            <td><input type="text" class="form-control" name="column{{ column.id }}"></td>
+                            <td>{{ forloop.counter|add:1 }}</td>
                         {% endfor %}
-                        <td>{% csrf_token %}<button class="btn btn-success" type="submit">Сохранить</button></td>
-                    </form>
-                </tr>
-            </tbody>
-        </table>
+                        <td>#</td>
+                    </tr>
+                </thead>
+                {% for line in line_list %}
+                    {% if forloop.first %}
+                        <tbody>
+                            <tr>
+                                <th scope="row">{{ line.Editor.get_full_name }}</th>
+                                {% for line_cell in cell_list %}
+                                    {% for cell in line_cell %}
+                                        {% ifequal line.id cell.LineID.id %}
+                                            <td>
+                                                {{ cell.Value }}
+                                            </td>
+                                        {% endifequal %}
+                                    {% endfor %}
+                                {% endfor %}
+                                <td><a data-toggle="collapse" href="#collapse{{ line.Editor.id }}" role="button" aria-expanded="false" aria-controls="collapse{{ line.Editor.id }}">{{ line.CreateDate }}</a></td>
+                            </tr>
+                        </tbody>
+                    {% else %}
+                        <tbody id="collapse{{ line.Editor.id }}" class="collapse">
+                            <tr>
+                                <td></td>
+                                {% for line_cell in cell_list %}
+                                    {% for cell in line_cell %}
+                                        {% ifequal line.id cell.LineID.id %}
+                                            <td>
+                                                {{ cell.Value }}
+                                            </td>
+                                        {% endifequal %}
+                                    {% endfor %}
+                                {% endfor %}
+                                <td>{{ line.CreateDate }}</td>
+                            </tr>
+                        </tbody>
+                    {% endif %}
+                {% endfor %}
+                    <tbody>
+                        <tr>
+                            <form method='post' action='{% url 'cell_save' report.id %}'>
+                                <td>Добавить значения:</td>
+                                {% for column in column_list %}
+                                    <td><input type="text" class="form-control" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} required></td>
+                                {% endfor %}
+                                <td>{% csrf_token %}<button class="btn btn-success" type="submit">Сохранить</button></td>
+                            </form>
+                        </tr>
+                    </tbody>
+            </table>
+        </div>
     </div>
 {% endblock %}

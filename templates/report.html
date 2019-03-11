@@ -25,16 +25,16 @@
             </div>
         </div>
         <div class="shadow p-3 mb-5 bg-white rounded">
-            <h2>{{ report.TitleLong }}</h2>
+            <h5>{{ report.TitleLong }}</h5>
             <table class="table table-hover table-sm table-bordered">
                 <thead class="bg-info text-white">
                     {% autoescape off %}{{ report.Header }}{% endautoescape %}
                     <tr>
-                        <td>1</td>
+                        <td><small>1</small></td>
                         {% for column in column_list %}
-                            <td>{{ forloop.counter|add:1 }}</td>
+                            <td><small>{{ forloop.counter|add:1 }}</small></td>
                         {% endfor %}
-                        <td>#</td>
+                        <td><small>#</small></td>
                     </tr>
                 </thead>
                 {% for line in line_list %}
@@ -76,6 +76,7 @@
                         <tr>
                             <form method='post' action='{% url 'cell_save' report.id %}'>
                                 <td>Добавить значения:</td>
+                                {{ last_items }}
                                 {% for column in column_list %}
                                     <td><input type="text" class="form-control" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} required></td>
                                 {% endfor %}

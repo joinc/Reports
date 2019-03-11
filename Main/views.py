@@ -123,6 +123,7 @@ def report_view(request, report_id):
     if request.user.is_superuser:
         return HttpResponseRedirect(reverse('report_total', args=(report.id,)))
     else:
+        last_items = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
         line_list = Lines.objects.filter(ReportID=report).filter(Editor=request.user)
         cell_list = []
         for line in line_list:
@@ -132,7 +133,7 @@ def report_view(request, report_id):
     breadcrumb = 'Просмотр таблицы "' + report.TitleShort + '"'
     return render(request, 'report.html',
                   {'report': report, 'column_list': column_list, 'line_list': line_list, 'cell_list': cell_list,
-                   'breadcrumb': breadcrumb, })
+                   'last_items': last_items, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 

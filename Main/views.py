@@ -123,7 +123,8 @@ def report_view(request, report_id):
     if request.user.is_superuser:
         return HttpResponseRedirect(reverse('report_total', args=(report.id,)))
     else:
-        last_items = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
+        last_line = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
+        last_items = Cells.objects.filter(LineID=last_line)
         line_list = Lines.objects.filter(ReportID=report).filter(Editor=request.user)
         cell_list = []
         for line in line_list:
@@ -146,6 +147,7 @@ def report_total(request, report_id):
     report = get_object_or_404(Reports, id=report_id)
     if request.user.is_superuser:
         column_list = Columns.objects.filter(ReportID=report)
+        total_line = []
         user_list = []
         line_list = []
         for owner in User.objects.all():
@@ -157,13 +159,24 @@ def report_total(request, report_id):
                     cell_list.append(cells)
                 line_list.append(cell_list)
                 user_list.append(owner)
+        for column in column_list:
+            if column.TypeData == 1:
+                total = 0
+                for owner in user_list:
+                    last_line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
+                    cell = Cells.objects.filter(LineID=last_line).filter(ColumnID=column).first()
+                    total = total + float(cell.Value)
+                total_line.append(total)
+            else:
+                total_line.append('')
+
     else:
         return HttpResponseRedirect(reverse('report_view', args=(report.id,)))
 
     breadcrumb = 'Сводная таблицы "' + report.TitleShort + '"'
     return render(request, 'report_total.html',
                   {'report': report, 'column_list': column_list, 'line_list': line_list, 'cell_list': cell_list,
-                   'user_list': user_list, 'breadcrumb': breadcrumb, })
+                   'total_line': total_line, 'user_list': user_list, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 

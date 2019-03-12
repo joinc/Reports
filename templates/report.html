@@ -76,11 +76,21 @@
                         <tr>
                             <form method='post' action='{% url 'cell_save' report.id %}'>
                                 <td>Добавить значения:</td>
-                                {{ last_items }}
-                                {% for column in column_list %}
-                                    <td><input type="text" class="form-control" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} required></td>
-                                {% endfor %}
-                                <td>{% csrf_token %}<button class="btn btn-success" type="submit">Сохранить</button></td>
+                                {% if last_items.count > 0 %}
+                                    {% for item in last_items %}
+                                        {% for column in column_list %}
+                                            {% ifequal item.ColumnID column %}
+                                                <td><input type="text" class="form-control" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} value="{{ item.Value }}" required></td>
+                                            {% endifequal %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% for column in column_list %}
+                                        <td><input type="text" class="form-control" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} required></td>
+                                    {% endfor %}
+                                {% endif %}
+                                <td><button class="btn btn-success" type="submit">Сохранить</button></td>
+                                {% csrf_token %}
                             </form>
                         </tr>
                     </tbody>

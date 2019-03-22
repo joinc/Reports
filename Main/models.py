@@ -10,7 +10,7 @@ class Reports(models.Model):
     TitleShort = models.CharField('Краткое наименование', max_length=64, default='', )
     TitleLong = models.CharField('Полное наименование', max_length=1024, default='', )
     Published = models.BooleanField('Опубликована', default=False, )
-    Header = models.CharField('Заголовок таблицы', max_length=1024, default='', )
+    Header = models.CharField('Заголовок таблицы', max_length=10240, default='', )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
@@ -26,7 +26,7 @@ class Reports(models.Model):
 
 
 class Columns(models.Model):
-    Title = models.CharField('Наименование', max_length=64, default='', )
+    Title = models.CharField('Наименование', max_length=256, default='', )
     ReportID = models.ForeignKey(Reports, verbose_name='Отчет', null=False, related_name='ColumnReportID',
                                  on_delete=models.CASCADE, )
     TypeData = models.SmallIntegerField('Тип данных', choices=TYPE_CHOICES, default=1, )

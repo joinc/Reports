@@ -150,7 +150,7 @@ def report_total(request, report_id):
         total_line = []
         user_list = []
         line_list = []
-        for owner in User.objects.all():
+        for owner in User.objects.all().order_by('last_name'):
             lines = Lines.objects.filter(ReportID=report).filter(Editor=owner)
             if lines.count() > 0:
                 cell_list = []
@@ -166,7 +166,7 @@ def report_total(request, report_id):
                     last_line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
                     cell = Cells.objects.filter(LineID=last_line).filter(ColumnID=column).first()
                     total = total + float(cell.Value)
-                total_line.append(total)
+                total_line.append(float('{:.2f}'.format(total)))
             else:
                 total_line.append('')
 

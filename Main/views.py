@@ -165,7 +165,12 @@ def report_total(request, report_id):
                 for owner in user_list:
                     last_line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
                     cell = Cells.objects.filter(LineID=last_line).filter(ColumnID=column).first()
-                    total = total + float(cell.Value)
+                    if cell is not None:
+                        try:
+                            cell_value = float(cell.Value)
+                        except ValueError:
+                            cell_value = 0
+                        total = total + cell_value
                 total_line.append(float('{:.2f}'.format(total)))
             else:
                 total_line.append('')

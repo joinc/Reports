@@ -74,7 +74,7 @@
                 {% endfor %}
                     <tbody>
                         <tr>
-                            <form method='post' action='{% url 'cell_save' report.id %}'>
+                            <form method='post' action='{% url 'cells_save' report.id %}'>
                                 <td>Добавить значения:</td>
                                 {% if last_items.count > 0 %}
                                     {% for item in last_items %}

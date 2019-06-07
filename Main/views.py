@@ -214,6 +214,7 @@ def column_save(request, report_id):
         column.Title = column_title
         column.ReportID = report
         column.save()
+        fill_cells(report_id)
         return HttpResponseRedirect(reverse('report_edit', args=(report.id,)))
 
     return HttpResponseRedirect(reverse('index'))
@@ -234,7 +235,20 @@ def column_delete(request, column_id):
 ######################################################################################################################
 
 
-def cell_save(request, report_id):
+def cell_save(cell_line, cell_column, cell_owner, cell_value):
+    # Процедура создания и заполнения значением новой ячейки
+
+    cell = Cells()
+    cell.LineID = cell_line
+    cell.ColumnID = cell_column
+    cell.Owner = cell_owner
+    cell.Value = cell_value
+    cell.save()
+
+######################################################################################################################
+
+
+def cells_save(request, report_id):
 
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
@@ -248,12 +262,35 @@ def cell_save(request, report_id):
         line.save()
         for column in column_list:
             cell_value = request.POST['column'+column.id.__str__()]
-            cell = Cells()
-            cell.Value = cell_value
-            cell.ColumnID = column
-            cell.LineID = line
-            cell.Owner = request.user
-            cell.save()
+            if cell_value:
+                cell_save(line, column, request.user, cell_value)
+            else:
+                cell_save(line, column, request.user, '')
         return HttpResponseRedirect(reverse('report_view', args=(report.id,)))
 
     return HttpResponseRedirect(reverse('index'))
+
+######################################################################################################################
+
+
+def fill_cells(report_id):
+
+    report = get_object_or_404(Reports, id=report_id)
+    user_list = User.objects.all()
+    for p_user in user_list:
+        if not p_user.is_superuser:
+            column_list = Columns.objects.filter(ReportID=report)
+            line_list = Lines.objects.filter(Editor=p_user).filter(ReportID=report)
+            if line_list.count() == 0:
+                line = Lines()
+                line.ReportID = report
+                line.Editor = p_user
+                line.save()
+                for column in column_list:
+                    cell_save(line, column, p_user, '')
+            else:
+                for line in line_list:
+                    for column in column_list:
+                        if Cells.objects.filter(LineID=line).filter(ColumnID=column).filter(Owner=p_user).count() == 0:
+                            cell_save(line, column, p_user, '')
+

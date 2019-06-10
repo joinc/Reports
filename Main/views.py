@@ -119,12 +119,19 @@ def report_view(request, report_id):
         return HttpResponseRedirect(reverse('login'))
 
     report = get_object_or_404(Reports, id=report_id)
-    column_list = Columns.objects.filter(ReportID=report)
     if request.user.is_superuser:
         return HttpResponseRedirect(reverse('report_total', args=(report.id,)))
     else:
-        last_line = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
-        last_items = Cells.objects.filter(LineID=last_line)
+        table = []
+        column_list = Columns.objects.filter(ReportID=report)
+        lines = Lines.objects.filter(ReportID=report).filter(Editor=request.user)
+        if lines.count() > 0:
+            last_line = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
+            last_items = Cells.objects.filter(LineID=last_line)
+            for line in lines:
+                cells = Cells.objects.filter(LineID=line)
+                table.append([line, cells])
+
         line_list = Lines.objects.filter(ReportID=report).filter(Editor=request.user)
         cell_list = []
         for line in line_list:
@@ -134,7 +141,7 @@ def report_view(request, report_id):
     breadcrumb = 'Просмотр таблицы "' + report.TitleShort + '"'
     return render(request, 'report.html',
                   {'report': report, 'column_list': column_list, 'line_list': line_list, 'cell_list': cell_list,
-                   'last_items': last_items, 'breadcrumb': breadcrumb, })
+                   'last_items': last_items, 'table': table, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
@@ -147,18 +154,18 @@ def report_total(request, report_id):
     report = get_object_or_404(Reports, id=report_id)
     if request.user.is_superuser:
         column_list = Columns.objects.filter(ReportID=report)
+        table_list = []
         total_line = []
         user_list = []
-        line_list = []
         for owner in User.objects.all().order_by('last_name'):
+            tables = []
             lines = Lines.objects.filter(ReportID=report).filter(Editor=owner)
             if lines.count() > 0:
-                cell_list = []
+                user_list.append(owner)
                 for line in lines:
                     cells = Cells.objects.filter(LineID=line)
-                    cell_list.append(cells)
-                line_list.append(cell_list)
-                user_list.append(owner)
+                    tables.append([line, cells])
+                table_list.append([owner, tables])
         for column in column_list:
             if column.TypeData == 1:
                 total = 0
@@ -174,14 +181,13 @@ def report_total(request, report_id):
                 total_line.append(float('{:.2f}'.format(total)))
             else:
                 total_line.append('')
-
     else:
         return HttpResponseRedirect(reverse('report_view', args=(report.id,)))
 
     breadcrumb = 'Сводная таблицы "' + report.TitleShort + '"'
     return render(request, 'report_total.html',
-                  {'report': report, 'column_list': column_list, 'line_list': line_list, 'cell_list': cell_list,
-                   'total_line': total_line, 'user_list': user_list, 'breadcrumb': breadcrumb, })
+                  {'report': report, 'column_list': column_list, 'total_line': total_line, 'table_list': table_list,
+                   'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 

@@ -37,38 +37,28 @@
                         <td>#</td>
                     </tr>
                 </thead>
-                {% for lines in line_list %}
-                    {% for line in lines %}
+                {% for owner, table in table_list %}
+                    {% for line, cells in table %}
                         {% if forloop.first %}
                             <tbody>
-                                <tr>
-                                    {% for cell in line %}
-                                        {% if forloop.first %}
-                                            <th scope="row">{{ cell.Owner.get_full_name }}</th>
-                                        {% endif %}
-                                        <td>{{ cell.Value }}</td>
-                                        {% if forloop.last %}
-                                            <td><a data-toggle="collapse" href="#collapse{{ cell.Owner.id }}" role="button" aria-expanded="false" aria-controls="collapse{{ cell.Owner.id }}">{{ cell.CreateDate }}</a></td>
-                                        {% endif %}
-                                    {% endfor %}
-                                </tr>
+                            <tr>
+                                <th scope="row">{{ line.Editor.get_full_name }}</th>
+                                {%  for cell in cells %}
+                                    <td>{{ cell.Value }}</td>
+                                {% endfor %}
+                                <td><a data-toggle="collapse" href="#collapse{{ line.Editor.id }}" role="button" aria-expanded="false" aria-controls="collapse{{ line.Editor.id }}">{{ line.CreateDate }}</a></td>
+                            </tr>
                             </tbody>
                         {% else %}
-                            {% with line|first as line_zero %}
-                                <tbody id="collapse{{ line_zero.Owner.id }}" class="collapse">
-                                    <tr>
-                                        {% for cell in line %}
-                                            {% if forloop.first %}
-                                                <td></td>
-                                            {% endif %}
-                                            <td>{{ cell.Value }}</td>
-                                            {% if forloop.last %}
-                                                <td>{{ cell.CreateDate }}</td>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </tr>
-                                </tbody>
-                            {% endwith %}
+                            <tbody id="collapse{{ line.Editor.id }}" class="collapse">
+                            <tr>
+                                <td></td>
+                                {%  for cell in cells %}
+                                    <td>{{ cell.Value }}</td>
+                                {% endfor %}
+                                <td>{{ line.CreateDate }}</td>
+                            </tr>
+                            </tbody>
                         {% endif %}
                     {% endfor %}
                 {% endfor %}

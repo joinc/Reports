@@ -37,62 +37,46 @@
                         <td><small>#</small></td>
                     </tr>
                 </thead>
-                {% for line in line_list %}
+                {% for line, cells in table %}
                     {% if forloop.first %}
                         <tbody>
-                            <tr>
-                                <th scope="row">{{ line.Editor.get_full_name }}</th>
-                                {% for line_cell in cell_list %}
-                                    {% for cell in line_cell %}
-                                        {% ifequal line.id cell.LineID.id %}
-                                            <td>
-                                                {{ cell.Value }}
-                                            </td>
-                                        {% endifequal %}
-                                    {% endfor %}
-                                {% endfor %}
-                                <td><a data-toggle="collapse" href="#collapse{{ line.Editor.id }}" role="button" aria-expanded="false" aria-controls="collapse{{ line.Editor.id }}">{{ line.CreateDate }}</a></td>
-                            </tr>
+                        <tr>
+                            <th scope="row">{{ line.Editor.get_full_name }}</th>
+                            {% for cell in cells %}
+                                <td>{{ cell.Value }}</td>
+                            {% endfor %}
+                            <td><a data-toggle="collapse" href="#collapse{{ line.Editor.id }}" role="button" aria-expanded="false" aria-controls="collapse{{ line.Editor.id }}">{{ line.CreateDate }}</a></td>
+                        </tr>
                         </tbody>
                     {% else %}
                         <tbody id="collapse{{ line.Editor.id }}" class="collapse">
-                            <tr>
-                                <td></td>
-                                {% for line_cell in cell_list %}
-                                    {% for cell in line_cell %}
-                                        {% ifequal line.id cell.LineID.id %}
-                                            <td>
-                                                {{ cell.Value }}
-                                            </td>
-                                        {% endifequal %}
-                                    {% endfor %}
-                                {% endfor %}
-                                <td>{{ line.CreateDate }}</td>
-                            </tr>
+                        <tr>
+                            <td></td>
+                            {% for cell in cells %}
+                                <td>{{ cell.Value }}</td>
+                            {% endfor %}
+                            <td>{{ line.CreateDate }}</td>
+                        </tr>
                         </tbody>
                     {% endif %}
                 {% endfor %}
                     <tbody>
-                        <tr>
-                            <form method='post' action='{% url 'cells_save' report.id %}'>
-                                <td>Добавить значения:</td>
-                                {% if last_items.count > 0 %}
-                                    {% for item in last_items %}
-                                        {% for column in column_list %}
-                                            {% ifequal item.ColumnID column %}
-                                                <td><input type="text" class="form-control" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} value="{{ item.Value }}" required></td>
-                                            {% endifequal %}
-                                        {% endfor %}
-                                    {% endfor %}
-                                {% else %}
-                                    {% for column in column_list %}
-                                        <td><input type="text" class="form-control" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} required></td>
-                                    {% endfor %}
-                                {% endif %}
-                                <td><button class="btn btn-success" type="submit">Сохранить</button></td>
-                                {% csrf_token %}
-                            </form>
-                        </tr>
+                    <tr>
+                        <form method='post' action='{% url 'cells_save' report.id %}'>
+                            <td>Добавить значения:</td>
+                            {% if last_items.count > 0 %}
+                                {% for item in last_items %}
+                                    <td><input type="text" class="form-control" name="column{{ item.ColumnID.id }}" {% ifequal item.ColumnID.TypeData 1 %}id="numeric"{% endifequal %} value="{{ item.Value }}" required></td>
+                                {% endfor %}
+                            {% else %}
+                                {% for column in column_list %}
+                                    <td><input type="text" class="form-control" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} required></td>
+                                {% endfor %}
+                            {% endif %}
+                            <td><button class="btn btn-success" type="submit">Сохранить</button></td>
+                            {% csrf_token %}
+                        </form>
+                    </tr>
                     </tbody>
             </table>
         </div>

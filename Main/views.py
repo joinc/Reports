@@ -126,22 +126,17 @@ def report_view(request, report_id):
         column_list = Columns.objects.filter(ReportID=report)
         lines = Lines.objects.filter(ReportID=report).filter(Editor=request.user)
         if lines.count() > 0:
-            last_line = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
-            last_items = Cells.objects.filter(LineID=last_line)
             for line in lines:
                 cells = Cells.objects.filter(LineID=line)
                 table.append([line, cells])
-
-        line_list = Lines.objects.filter(ReportID=report).filter(Editor=request.user)
-        cell_list = []
-        for line in line_list:
-            cells = Cells.objects.filter(LineID=line).filter(Owner=request.user)
-            cell_list.append(cells)
+        last_cells = []
+        for column in column_list:
+            last_cells.append([column, Cells.objects.filter(LineID=lines.first()).filter(ColumnID=column).first()])
 
     breadcrumb = 'Просмотр таблицы "' + report.TitleShort + '"'
     return render(request, 'report.html',
-                  {'report': report, 'column_list': column_list, 'line_list': line_list, 'cell_list': cell_list,
-                   'last_items': last_items, 'table': table, 'breadcrumb': breadcrumb, })
+                  {'report': report, 'column_list': column_list, 'last_cells': last_cells, 'table': table,
+                   'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
@@ -241,6 +236,20 @@ def column_delete(request, column_id):
 ######################################################################################################################
 
 
+def line_delete(request, line_id):
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    line = get_object_or_404(Lines, id=line_id)
+    if line.Editor == request.user or request.user.is_superuser:
+        report_id = line.ReportID.id
+        line.delete()
+    return HttpResponseRedirect(reverse('report_view', args=(report_id,)))
+
+######################################################################################################################
+
+
 def cell_save(cell_line, cell_column, cell_owner, cell_value):
     # Процедура создания и заполнения значением новой ячейки
 
@@ -269,6 +278,7 @@ def cells_save(request, report_id):
         for column in column_list:
             cell_value = request.POST['column'+column.id.__str__()]
             if cell_value:
+                cell_value = cell_value.replace(',', '.')
                 cell_save(line, column, request.user, cell_value)
             else:
                 cell_save(line, column, request.user, '')

@@ -31,6 +31,7 @@ urlpatterns = [
     path('report/<int:report_id>/column/save/', views.column_save, name='column_save', ),
     path('report/<int:report_id>/cell/save/', views.cells_save, name='cells_save', ),
     path('column/<int:column_id>/delete/', views.column_delete, name='column_delete', ),
+    path('line/<int:line_id>/delete/', views.line_delete, name='line_delete', ),
     path('login/', views.LoginFormView.as_view(), name='login', ),
     path('logout/', views.logout_view, name='logout', ),
 ]

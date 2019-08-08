@@ -20,8 +20,10 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', views.index, name='index', ),
+    path('admin/', admin.site.urls),
+    path('login/', views.login, name='login', ),
+    path('logout/', views.logout, name='logout', ),
     path('report/create/', views.report_create, name='report_create', ),
     path('report/<int:report_id>/', views.report_view, name='report_view', ),
     path('report/<int:report_id>/total', views.report_total, name='report_total', ),
@@ -32,6 +34,4 @@ urlpatterns = [
     path('report/<int:report_id>/cell/save/', views.cells_save, name='cells_save', ),
     path('column/<int:column_id>/delete/', views.column_delete, name='column_delete', ),
     path('line/<int:line_id>/delete/', views.line_delete, name='line_delete', ),
-    path('login/', views.LoginFormView.as_view(), name='login', ),
-    path('logout/', views.logout_view, name='logout', ),
 ]

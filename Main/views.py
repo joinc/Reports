@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth.models import auth, User
+from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import FormView
 from django.conf import settings
 from Main.models import Reports, Columns, Lines, Cells
@@ -14,10 +16,18 @@ from .forms import FormReportCreate, FormReportEdit, FormColumn
 ######################################################################################################################
 
 
-def index(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
+def superuser_only(function):
+   def _inner(request, *args, **kwargs):
+       if not request.user.is_superuser:
+           return HttpResponseRedirect(reverse('index'))
+       return function(request, *args, **kwargs)
+   return _inner
 
+
+######################################################################################################################
+
+@login_required
+def index(request):
     if request.user.is_superuser:
         report_list = Reports.objects.all()
     else:
@@ -27,37 +37,33 @@ def index(request):
 ######################################################################################################################
 
 
-class LoginFormView(FormView):
-    form_class = AuthenticationForm
-
-    # Аналогично регистрации, только используем шаблон аутентификации.
-    template_name = "login.html"
-    # В случае успеха перенаправим на главную.
-    success_url = settings.SUCCESS_URL
-
-    def form_valid(self, form):
-        # Получаем объект пользователя на основе введённых в форму данных.
-        self.user = form.get_user()
-        # Выполняем аутентификацию пользователя.
-        login(self.request, self.user)
-
-        return super(LoginFormView, self).form_valid(form)
-
-######################################################################################################################
-
-
-def logout_view(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('index'))
+def login(request):
+    if request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
+        user = auth.authenticate(username=username, password=password)
+        if user:
+            auth.login(request, user)
+            #return redirect(request.META.get('HTTP_REFERER'))
+            return redirect(settings.SUCCESS_URL)
+        else:
+            messages.info(request, 'Не правильно введенные данные')
+            return redirect(reverse('login'))
+    else:
+        return render(request, 'login.html')
 
 ######################################################################################################################
 
 
+def logout(request):
+    auth.logout(request)
+    return redirect(reverse('index'))
+
+######################################################################################################################
+
+
+@superuser_only
 def report_create(request):
-
-    if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
-
     report_form = FormReportCreate()
     breadcrumb = 'Создание таблицы'
     if request.POST:
@@ -73,11 +79,8 @@ def report_create(request):
 ######################################################################################################################
 
 
+@superuser_only
 def report_edit(request, report_id):
-
-    if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
-
     report = get_object_or_404(Reports, id=report_id)
     report_form = FormReportEdit(initial={'report_title_short': report.TitleShort,
                                           'report_title_long': report.TitleLong,
@@ -92,11 +95,8 @@ def report_edit(request, report_id):
 ######################################################################################################################
 
 
+@superuser_only
 def report_save(request, report_id):
-
-    if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
-
     report = get_object_or_404(Reports, id=report_id)
     if request.POST:
         report_title_short = request.POST['report_title_short']
@@ -113,11 +113,8 @@ def report_save(request, report_id):
 ######################################################################################################################
 
 
+@login_required
 def report_view(request, report_id):
-
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     report = get_object_or_404(Reports, id=report_id)
     if request.user.is_superuser:
         return HttpResponseRedirect(reverse('report_total', args=(report.id,)))
@@ -141,11 +138,8 @@ def report_view(request, report_id):
 ######################################################################################################################
 
 
+@login_required
 def report_total(request, report_id):
-
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     report = get_object_or_404(Reports, id=report_id)
     if request.user.is_superuser:
         column_list = Columns.objects.filter(ReportID=report)
@@ -187,11 +181,8 @@ def report_total(request, report_id):
 ######################################################################################################################
 
 
+@superuser_only
 def report_publish(request, report_id):
-
-    if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
-
     report = get_object_or_404(Reports, id=report_id)
     if not report.Published:
         report.Published = True
@@ -203,11 +194,8 @@ def report_publish(request, report_id):
 ######################################################################################################################
 
 
+@superuser_only
 def column_save(request, report_id):
-
-    if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
-
     report = get_object_or_404(Reports, id=report_id)
     if request.POST:
         column_title = request.POST['column_title']
@@ -215,19 +203,15 @@ def column_save(request, report_id):
         column.Title = column_title
         column.ReportID = report
         column.save()
-        fill_cells(report_id)
+        fill_cells(report)
         return HttpResponseRedirect(reverse('report_edit', args=(report.id,)))
-
     return HttpResponseRedirect(reverse('index'))
 
 ######################################################################################################################
 
 
+@superuser_only
 def column_delete(request, column_id):
-
-    if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
-
     column = get_object_or_404(Columns, id=column_id)
     report_id = column.ReportID.id
     column.delete()
@@ -236,11 +220,8 @@ def column_delete(request, column_id):
 ######################################################################################################################
 
 
+@login_required
 def line_delete(request, line_id):
-
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     line = get_object_or_404(Lines, id=line_id)
     if line.Editor == request.user or request.user.is_superuser:
         report_id = line.ReportID.id
@@ -263,11 +244,8 @@ def cell_save(cell_line, cell_column, cell_owner, cell_value):
 ######################################################################################################################
 
 
+@login_required
 def cells_save(request, report_id):
-
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     report = get_object_or_404(Reports, id=report_id)
     if request.POST:
         column_list = Columns.objects.filter(ReportID=report)
@@ -283,15 +261,12 @@ def cells_save(request, report_id):
             else:
                 cell_save(line, column, request.user, '')
         return HttpResponseRedirect(reverse('report_view', args=(report.id,)))
-
     return HttpResponseRedirect(reverse('index'))
 
 ######################################################################################################################
 
 
-def fill_cells(report_id):
-
-    report = get_object_or_404(Reports, id=report_id)
+def fill_cells(report):
     user_list = User.objects.all()
     for p_user in user_list:
         if not p_user.is_superuser:

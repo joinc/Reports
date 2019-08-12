@@ -50,7 +50,7 @@
                                 <td class="text-right">{{ cell.Value|floatformat:2 }}</td>
                             {% endfor %}
                             <td>
-                                {{ line.CreateDate }} <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDelete{{ line.id }}" title="Удалить строку"><span class="fas fa-eraser" style="color: #ff6b6b;"></span></button>
+                                <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.Y" }}</span> <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDelete{{ line.id }}" title="Удалить строку"><span class="fas fa-eraser" style="color: #ff6b6b;"></span></button>
                                 <!-- Modal -->
                                 <div class="modal fade" id="ModalDelete{{ line.id }}" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -80,7 +80,7 @@
                                 <td class="text-right">{{ cell.Value|floatformat:2 }}</td>
                             {% endfor %}
                             <td>
-                                {{ line.CreateDate }} <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDelete{{ line.id }}" title="Удалить строку"><span class="fas fa-eraser" style="color: #ff6b6b;"></span></button>
+                                <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.Y" }}</span> <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDelete{{ line.id }}" title="Удалить строку"><span class="fas fa-eraser" style="color: #ff6b6b;"></span></button>
                                 <!-- Modal -->
                                 <div class="modal fade" id="ModalDelete{{ line.id }}" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document">

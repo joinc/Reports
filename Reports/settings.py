@@ -123,5 +123,5 @@ STATIC_URL = '/static/'
 
 TEMPLATE_DIRS = (os.path.join(BASE_DIR,  'templates'),)
 
-LOGIN_URL = '/login/'
 SUCCESS_URL = '/'
+LOGIN_URL = '/login/'

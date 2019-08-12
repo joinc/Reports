@@ -142,40 +142,46 @@ def report_view(request, report_id):
 def report_total(request, report_id):
     report = get_object_or_404(Reports, id=report_id)
     if request.user.is_superuser:
-        column_list = Columns.objects.filter(ReportID=report)
-        table_list = []
-        total_line = []
-        user_list = []
-        for owner in User.objects.all().order_by('last_name'):
-            tables = []
-            lines = Lines.objects.filter(ReportID=report).filter(Editor=owner)
-            if lines.count() > 0:
-                user_list.append(owner)
-                for line in lines:
+        if request.GET:
+            czn = int(request.GET.get('czn'))
+            table = []
+            lines = Lines.objects.filter(ReportID=report).filter(Editor_id=czn)
+            for line in lines:
+                cells = Cells.objects.filter(LineID=line)
+                table.append([line, cells])
+            return render(request, 'report_czn.html', {'table': table, })
+        else:
+            users = User.objects.all().order_by('last_name')
+            column_list = Columns.objects.filter(ReportID=report)
+            data_list = []
+            total_list = []
+            for column in column_list:
+                if column.TypeData == 1:
+                    total = 0
+                    for owner in users:
+                        line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
+                        cell = Cells.objects.filter(LineID=line).filter(ColumnID=column).first()
+                        if cell is not None:
+                            try:
+                                cell_value = float(cell.Value)
+                            except ValueError:
+                                cell_value = 0
+                            total = total + cell_value
+                    total_list.append(float('{:.2f}'.format(total)))
+                else:
+                    total_list.append('')
+            for owner in users:
+                count = Lines.objects.filter(ReportID=report).filter(Editor=owner).count()
+                if count > 0:
+                    line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
                     cells = Cells.objects.filter(LineID=line)
-                    tables.append([line, cells])
-                table_list.append([owner, tables])
-        for column in column_list:
-            if column.TypeData == 1:
-                total = 0
-                for owner in user_list:
-                    last_line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
-                    cell = Cells.objects.filter(LineID=last_line).filter(ColumnID=column).first()
-                    if cell is not None:
-                        try:
-                            cell_value = float(cell.Value)
-                        except ValueError:
-                            cell_value = 0
-                        total = total + cell_value
-                total_line.append(float('{:.2f}'.format(total)))
-            else:
-                total_line.append('')
+                    data_list.append([owner, count, cells, line.CreateDate])
+
     else:
         return HttpResponseRedirect(reverse('report_view', args=(report.id,)))
-
     breadcrumb = 'Сводная таблицы "' + report.TitleShort + '"'
     return render(request, 'report_total.html',
-                  {'report': report, 'column_list': column_list, 'total_line': total_line, 'table_list': table_list,
+                  {'report': report, 'column_list': column_list, 'total_list': total_list, 'data_list': data_list,
                    'breadcrumb': breadcrumb, })
 
 ######################################################################################################################

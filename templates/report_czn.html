@@ -1,0 +1,11 @@
+{% for line, cells in table %}
+    {% if not forloop.first %}
+        <tr>
+            <td></td>
+            {%  for cell in cells %}
+                <td class="text-right">{{ cell.Value|floatformat:2 }}</td>
+            {% endfor %}
+            <td><span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.Y" }}</span></td>
+        </tr>
+    {% endif %}
+{% endfor %}

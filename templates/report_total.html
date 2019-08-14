@@ -25,14 +25,14 @@
                 <thead class="bg-info text-white">
                     {% autoescape off %}{{ report.Header }}{% endautoescape %}
                     <tr>
-                        <td>1</td>
+                        <td><small>1</small></td>
                         {% for column in column_list %}
-                            <td>{{ forloop.counter|add:1 }}</td>
+                            <td><small>{{ forloop.counter|add:1 }}</small></td>
                         {% endfor %}
-                        <td>#</td>
+                        <td><small>#</small></td>
                     </tr>
                 </thead>
-                {% for owner, count, cells, date in data_list %}
+                {% for owner, count, cells, line in data_list %}
                     <tr>
                         <td>
                             {% if count > 1 %}
@@ -44,7 +44,7 @@
                         {% for cell in cells %}
                             <td class="text-right">{{ cell.Value|floatformat:2 }}</td>
                         {% endfor %}
-                        <td><span title="{{ date }}">{{ date|date:"d.m.Y" }}</span></td>
+                        <td><span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.Y" }}</span></td>
                     </tr>
                     <tbody class="czn{{ owner.id }}">
                     </tbody>

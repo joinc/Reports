@@ -119,21 +119,24 @@ def report_view(request, report_id):
     if request.user.is_superuser:
         return HttpResponseRedirect(reverse('report_total', args=(report.id,)))
     else:
-        table = []
-        column_list = Columns.objects.filter(ReportID=report)
-        lines = Lines.objects.filter(ReportID=report).filter(Editor=request.user)
-        if lines.count() > 0:
+        if request.GET:
+            table = []
+            lines = Lines.objects.filter(ReportID=report).filter(Editor_id=request.user)
             for line in lines:
                 cells = Cells.objects.filter(LineID=line)
                 table.append([line, cells])
-        last_cells = []
-        for column in column_list:
-            last_cells.append([column, Cells.objects.filter(LineID=lines.first()).filter(ColumnID=column).first()])
-
+            return render(request, 'report_czn.html', {'table': table, })
+        else:
+            column_list = Columns.objects.filter(ReportID=report)
+            data_list = []
+            count = Lines.objects.filter(ReportID=report).filter(Editor=request.user).count()
+            if count > 0:
+                line = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
+                cells = Cells.objects.filter(LineID=line)
+                data_list.append([request.user, count, cells, line])
     breadcrumb = 'Просмотр таблицы "' + report.TitleShort + '"'
     return render(request, 'report.html',
-                  {'report': report, 'column_list': column_list, 'last_cells': last_cells, 'table': table,
-                   'breadcrumb': breadcrumb, })
+                  {'report': report, 'column_list': column_list, 'data_list': data_list, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
@@ -175,7 +178,7 @@ def report_total(request, report_id):
                 if count > 0:
                     line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
                     cells = Cells.objects.filter(LineID=line)
-                    data_list.append([owner, count, cells, line.CreateDate])
+                    data_list.append([owner, count, cells, line])
 
     else:
         return HttpResponseRedirect(reverse('report_view', args=(report.id,)))

@@ -49,6 +49,18 @@ class FormReportEdit(forms.Form):
 
 class FormColumn(forms.Form):
 
+    column_title = forms.CharField(
+        label='',
+        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите наименование столбца', }),
+        required=False,
+    )
+
+    column_priority = forms.CharField(
+        label='',
+        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите очередность столбца', }),
+        required=False,
+    )
+
     column_type = forms.ChoiceField(
         choices=TYPE_CHOICES,
         label='',
@@ -57,11 +69,6 @@ class FormColumn(forms.Form):
         required=True
     )
 
-    column_title = forms.CharField(
-        label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите наименование столбца', }),
-        required=False,
-    )
 
     column_total = forms.ChoiceField(
         choices=FORMULA_CHOICES,

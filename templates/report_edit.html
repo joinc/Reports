@@ -39,52 +39,133 @@
             </form>
         </div>
         <div class="shadow p-3 mb-5 bg-white rounded">
-            <form method='post' action='{% url 'column_save' report.id %}'>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Тип данных:</label>
-                    <div class="col-sm-10">
-                        {{ column_form.column_type }}
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Наименование столбца:</label>
-                    <div class="col-sm-10">
-                        {{ column_form.column_title }}
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Формула значения итого:</label>
-                    <div class="col-sm-10">
-                        {{ column_form.column_total }}
-                    </div>
-                </div>
-                {% csrf_token %}
-                <button class="btn btn-info" type="submit">Добавить столбец</button>
-            </form>
-        </div>
-        <div class="shadow p-3 mb-5 bg-white rounded">
-        <h5>{{ report.TitleLong }}</h5>
-        <table class="table table-hover table-bordered">
-            <thead class="bg-info text-white">
-                {% autoescape off %}{{ report.Header }}{% endautoescape %}
-                <tr>
-                    <td>1</td>
-                    {% for column in column_list %}
-                        <td>{{ forloop.counter|add:1 }}</td>
-                    {% endfor %}
-                    <td>#</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><small>Ответственное лицо</small></td>
-                    {% for column in column_list %}
-                        <td><small>{{ column.Title }} <a class="btn btn-outline-danger btn-sm" href="{% url 'column_delete' column.id %}" role="button">Удалить</a></small></td>
-                    {% endfor %}
-                    <td>#</td>
-                </tr>
-            </tbody>
-        </table>
+            <h5>{{ report.TitleLong }}</h5>
+            <table class="table table-hover table-bordered">
+                <thead class="bg-info text-white">
+                    {% autoescape off %}{{ report.Header }}{% endautoescape %}
+                    <tr>
+                        <td>1</td>
+                        {% for column in column_list %}
+                            <td>{{ forloop.counter|add:1 }}</td>
+                        {% endfor %}
+                        <td>#</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><small>Ответственное лицо</small></td>
+                        {% for column, form in column_list %}
+                            <td>
+                                [{{ column.Priority }}]
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#ModalEdit{{ column.id }}" title="Редактировать столбец"><span class="fas fa-edit" style="color: #45abff;"></span></button>
+                                <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#ModalDelete{{ column.id }}" title="Удалить столбец"><span class="fas fa-eraser" style="color: #ff6b6b;"></span></button>
+                                <br />
+                                <small>{{ column.Title }}</small>
+                                <!-- Modal Edit -->
+                                <div class="modal fade" id="ModalEdit{{ column.id }}" tabindex="-1" role="dialog" aria-labelledby="ModalEditTitle" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form method='post' action='{% url 'column_edit' column.id %}'>
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="ModalDeleteTitle">Редактирование столбца данных</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label class="col-form-label">Наименование столбца:</label>
+                                                        {{ form.column_title }}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-form-label">Очередность:</label>
+                                                        {{ form.column_priority }}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-form-label">Тип данных:</label>
+                                                        {{ form.column_type }}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-form-label">Формула значения итого:</label>
+                                                        {{ form.column_total }}
+                                                    </div>
+                                                    {% csrf_token %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-success" type="submit">Сохранить</button>
+                                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Не сохранять</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /Modal Edit -->
+                                <!-- Modal Delete -->
+                                <div class="modal fade" id="ModalDelete{{ column.id }}" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteTitle" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="ModalDeleteTitle">Удаление столбца данных</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">Вы действительно хотите удалить выбранный столбец?</div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-success" data-dismiss="modal">Не удалять</button>
+                                                <a class="btn btn-danger" href="{% url 'column_delete' column.id %}" role="button">Удалить</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /Modal Delete -->
+                            </td>
+                        {% endfor %}
+                        <td>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#ModalNewColumn" title="Добавить столбец">Добавить столбец</button>
+                            <!-- Modal New -->
+                            <div class="modal fade" id="ModalNewColumn" tabindex="-1" role="dialog" aria-labelledby="ModalEditTitle" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <form method='post' action='{% url 'column_save' report.id %}'>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="ModalDeleteTitle">Добавление столбца данных</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Наименование столбца:</label>
+                                                    {{ column_form.column_title }}
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Очередность:</label>
+                                                    {{ column_form.column_priority }}
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Тип данных:</label>
+                                                    {{ column_form.column_type }}
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Формула значения итого:</label>
+                                                    {{ column_form.column_total }}
+                                                </div>
+                                                {% csrf_token %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-success" type="submit">Добавить</button>
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal">Не добавлять</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /Modal New -->
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 {% endblock %}

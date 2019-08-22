@@ -31,13 +31,14 @@ class Columns(models.Model):
                                  on_delete=models.CASCADE, )
     TypeData = models.SmallIntegerField('Тип данных', choices=TYPE_CHOICES, default=1, )
     TotalFormula = models.SmallIntegerField('Формула итого', choices=FORMULA_CHOICES, default=1, )
+    Priority = models.SmallIntegerField('Очередность столбцов', default=0, )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
         return '{0}'.format(self.Title)
 
     class Meta:
-        ordering = 'CreateDate',
+        ordering = 'Priority', 'CreateDate',
         verbose_name = 'Столбец'
         verbose_name_plural = 'Столбцы'
         managed = True
@@ -66,7 +67,7 @@ class Lines(models.Model):
 
 class Cells(models.Model):
 
-    Value = models.CharField('Значение', max_length=10, default='', )
+    Value = models.CharField('Значение', max_length=16, default='', )
     ColumnID = models.ForeignKey(Columns, verbose_name='Столбец', null=False, related_name='ColumnID',
                                  on_delete=models.CASCADE, )
     LineID = models.ForeignKey(Lines, verbose_name='Строка', null=False, related_name='LineID',

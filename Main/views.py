@@ -4,11 +4,8 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, logout
 from django.contrib.auth.models import auth, User
 from django.contrib.auth.decorators import login_required
-from django.views.generic.edit import FormView
 from django.conf import settings
 from Main.models import Reports, Columns, Lines, Cells
 from .forms import FormReportCreate, FormReportEdit, FormColumn
@@ -85,7 +82,16 @@ def report_edit(request, report_id):
     report_form = FormReportEdit(initial={'report_title_short': report.TitleShort,
                                           'report_title_long': report.TitleLong,
                                           'report_header': report.Header, })
-    column_list = Columns.objects.filter(ReportID=report)
+    columns = Columns.objects.filter(ReportID=report)
+    column_list = []
+    for column in columns:
+        form = FormColumn(initial={
+            'column_title': column.Title,
+            'column_priority': column.Priority,
+            'column_type': column.TypeData,
+            'column_total': column.TotalFormula,
+        })
+        column_list.append([column, form])
     column_form = FormColumn()
     breadcrumb = 'Редактирование таблицы "' + report.TitleShort + '"'
     return render(request, 'report_edit.html',
@@ -208,8 +214,10 @@ def column_save(request, report_id):
     report = get_object_or_404(Reports, id=report_id)
     if request.POST:
         column_title = request.POST['column_title']
+        column_priority = request.POST['column_priority']
         column = Columns()
         column.Title = column_title
+        column.Priority = column_priority
         column.ReportID = report
         column.save()
         fill_cells(report)
@@ -225,6 +233,20 @@ def column_delete(request, column_id):
     report_id = column.ReportID.id
     column.delete()
     return HttpResponseRedirect(reverse('report_edit', args=(report_id,)))
+
+######################################################################################################################
+
+
+@superuser_only
+def column_edit(request, column_id):
+    column = get_object_or_404(Columns, id=column_id)
+    if request.POST:
+        column_title = request.POST['column_title']
+        column_priority = request.POST['column_priority']
+        column.Title = column_title
+        column.Priority = column_priority
+    column.save()
+    return HttpResponseRedirect(reverse('report_edit', args=(column.ReportID.id,)))
 
 ######################################################################################################################
 
@@ -293,4 +315,3 @@ def fill_cells(report):
                     for column in column_list:
                         if Cells.objects.filter(LineID=line).filter(ColumnID=column).filter(Owner=p_user).count() == 0:
                             cell_save(line, column, p_user, '')
-

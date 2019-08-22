@@ -32,6 +32,7 @@ urlpatterns = [
     path('report/<int:report_id>/publish', views.report_publish, name='report_publish', ),
     path('report/<int:report_id>/column/save/', views.column_save, name='column_save', ),
     path('report/<int:report_id>/cell/save/', views.cells_save, name='cells_save', ),
+    path('column/<int:column_id>/edit/', views.column_edit, name='column_edit', ),
     path('column/<int:column_id>/delete/', views.column_delete, name='column_delete', ),
     path('line/<int:line_id>/delete/', views.line_delete, name='line_delete', ),
 ]

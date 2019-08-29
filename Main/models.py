@@ -67,7 +67,7 @@ class Lines(models.Model):
 
 class Cells(models.Model):
 
-    Value = models.CharField('Значение', max_length=16, default='', )
+    Value = models.CharField('Значение', max_length=1024, default='', )
     ColumnID = models.ForeignKey(Columns, verbose_name='Столбец', null=False, related_name='ColumnID',
                                  on_delete=models.CASCADE, )
     LineID = models.ForeignKey(Lines, verbose_name='Строка', null=False, related_name='LineID',

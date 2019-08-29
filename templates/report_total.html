@@ -15,7 +15,8 @@
             </div>
             <div class="col-auto">
                 {% if request.user.is_superuser %}
-                    <a class="btn btn-outline-info" href="{% url 'report_edit' report.id %}" role="button">Редактировать</a>
+                    <a class="btn btn-outline-info" href="{% url 'report_download' report.id %}" role="button"><i class="fas fa-download"></i> Скачать</a>
+                    <a class="btn btn-outline-info" href="{% url 'report_edit' report.id %}" role="button"><i class="fas fa-edit"></i> Редактировать</a>
                 {% endif %}
             </div>
         </div>
@@ -42,14 +43,13 @@
                             {% endif %}
                         </td>
                         {% for cell in cells %}
-                            <td class="text-right">{{ cell.Value|floatformat:2 }}</td>
+                            <td class="text-right">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
                         {% endfor %}
                         <td><span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.Y" }}</span></td>
                     </tr>
                     <tbody class="czn{{ owner.id }}">
                     </tbody>
                     <script>
-                        var pathname = $(location).attr('href');
                         var czn{{ owner.id }}view = false;
                         $(document).ready(function () {
                             $('#czn{{ owner.id }}').click(function () {

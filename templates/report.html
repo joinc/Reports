@@ -51,7 +51,7 @@
                             {% endif %}
                         </td>
                         {% for cell in cells %}
-                            <td class="text-right">{{ cell.Value|floatformat:2 }}</td>
+                            <td class="text-right">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
                         {% endfor %}
                         <td class="d-flex flex-nowrap">
                             <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.Y" }}</span>&nbsp;
@@ -104,7 +104,7 @@
                         <form method='post' action='{% url 'cells_save' report.id %}'>
                             <td>Добавить значения:</td>
                             {% for cell in cells %}
-                                <td><input type="text" class="form-control text-right" name="column{{ cell.ColumnID.id }}" {% ifequal cell.ColumnID.TypeData 1 %}id="numeric"{% endifequal %} value="{{ cell.Value|floatformat:2 }}" required></td>
+                                <td><input type="text" class="form-control text-right" name="column{{ cell.ColumnID.id }}" {% ifequal cell.ColumnID.TypeData 1 %}id="numeric" value="{{ cell.Value|floatformat:2 }}"{% else %}value="{{ cell.Value }}"{% endifequal %} required></td>
                             {% endfor %}
                             <td><button class="btn btn-success" type="submit">Сохранить</button></td>
                             {% csrf_token %}

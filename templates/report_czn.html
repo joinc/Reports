@@ -3,7 +3,7 @@
         <tr>
             <td></td>
             {%  for cell in cells %}
-                <td class="text-right">{{ cell.Value|floatformat:2 }}</td>
+                <td class="text-right">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
             {% endfor %}
             <td class="d-flex flex-nowrap">
                 <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.Y" }}</span>&nbsp;

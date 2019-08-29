@@ -125,3 +125,4 @@ TEMPLATE_DIRS = (os.path.join(BASE_DIR,  'templates'),)
 
 SUCCESS_URL = '/'
 LOGIN_URL = '/login/'
+EXPORT_FILE = 'upload/'

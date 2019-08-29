@@ -69,7 +69,6 @@ class FormColumn(forms.Form):
         required=True
     )
 
-
     column_total = forms.ChoiceField(
         choices=FORMULA_CHOICES,
         label='',

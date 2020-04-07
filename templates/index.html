@@ -1,10 +1,8 @@
 {% extends "base.html" %}
-{% load i18n %}{% load static from staticfiles %}
+{% load i18n %}{% load static %}
 
 {% block html_title %}Главная{% endblock %}
-
 {% block html_body %}
-    <br />
     <div class="container-fluid">
         <div class="card-columns">
             {% for report in report_list %}

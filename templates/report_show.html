@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static %}
+
+{% block html_title %}{{ breadcrumb }}{% endblock %}
+
+{% block html_body %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-auto mr-auto">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+                    <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
+                </ol>
+            </div>
+            <div class="col-auto">
+                {% if request.user.is_superuser %}
+                    <a class="btn btn-outline-info" href="{% url 'report_edit' report.id %}" role="button">Редактировать</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="shadow p-3 mb-5 bg-white rounded">
+            <h5>{{ report.TitleLong }}</h5>
+            <table class="table table-hover table-sm table-bordered">
+                <thead class="bg-info text-white">
+                {% autoescape off %}{{ report.Header }}{% endautoescape %}
+                <tr>
+                    <td><small>1</small></td>
+                    {% for column in columns %}
+                        <td><small>{{ forloop.counter|add:1 }}</small></td>
+                    {% endfor %}
+                    <td><small>#</small></td>
+                </tr>
+                </thead>
+                {% if count > 0 %}
+                    <tbody>
+                    <tr>
+                        <td>
+                            {% if count > 1 %}
+                                <button type="submit" class="btn btn-link p-0" onclick="LinesShow('{{ line.Editor.id }}', '#czn{{ user.id }}')">{{ line.Editor.get_full_name }}</button>
+                            {% else %}
+                                {{ line.Editor.get_full_name }}
+                            {% endif %}
+                        </td>
+                        {% for cell in cells %}
+                            <td class="text-right">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
+                        {% endfor %}
+                        <td class="flex-nowrap">
+                            <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.y" }} </span>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="LineDelete('{{ line.id }}')" title="Удалить строку"><span class="fas fa-eraser" style="color: #ff6b6b;"></span></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tbody id="czn{{ user.id }}"></tbody>
+                    <tbody>
+                    <tr>
+                        <form method='post' action='{% url 'cells_save' report.id %}'>
+                            {% csrf_token %}
+                            <td>Добавить значения:</td>
+                            {% for cell in cells %}
+                                <td><input type="text" class="form-control text-right" name="column{{ cell.ColumnID.id }}" {% ifequal cell.ColumnID.TypeData 1 %}id="numeric" value="{{ cell.Value|floatformat:2 }}"{% else %}value="{{ cell.Value }}"{% endifequal %} required></td>
+                            {% endfor %}
+                            <td><button class="btn btn-success" type="submit">Сохранить</button></td>
+                        </form>
+                    </tr>
+                    </tbody>
+                {% else %}
+                    <tbody>
+                    <tr>
+                        <form method='post' action='{% url 'cells_save' report.id %}'>
+                            {% csrf_token %}
+                            <td>Добавить значения:</td>
+                            {% for column in columns %}
+                                <td><input type="text" class="form-control text-right" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %} required></td>
+                            {% endfor %}
+                            <td><button class="btn btn-success" type="submit">Сохранить</button></td>
+                        </form>
+                    </tr>
+                    </tbody>
+                {% endif %}
+            </table>
+        </div>
+        <div class="shadow p-3 mb-5 bg-white rounded">
+            <table class="table table-hover table-sm table-bordered">
+            </table>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                При вводе чисел необходимо отделять десятичную часть <strong>запятой</strong>. <br />
+                При нажатии на название центра занятости отобразится <strong>история внесения данных</strong>. <br />
+                Возле даты создания строки размещена кнопка <strong>удаления данной строки</strong> (используйте внимательно).
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Окно запроса на удаление строки -->
+    <div class="modal fade" id="ModalDelete" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form id="ModalDeleteAction" method='post' action='{% url 'linedelete' report.id %}' >
+                    {% csrf_token %}
+                    <input type="hidden" name="Line_ID" id="Line_ID" value="">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalDeleteTitle">Удаление строки данных</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">Вы действительно хотите удалить выбранную строку?</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-dismiss="modal">Не удалять</button>
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /Окно запроса на удаление строки -->
+    <script type="text/javascript">
+        var cznview = false;
+        $(document).ready(function() {
+            $('[id=numeric]').bind("change keyup input click", function() {
+                if (this.value.match(/[^0-9\,]/g)) {
+                    this.value = this.value.replace(/[^0-9\,]/g, '');
+                }
+            });
+        });
+
+        function LinesShow(uid, divid) {
+            if (cznview) {
+                cznview = false;
+                $(divid).empty();
+            } else {
+                cznview = true;
+                $.get(($(location).attr('href')), {czn: uid }, function(data) {
+                    $(divid).append(data);
+                });
+            }
+        }
+        function LineDelete(uid) {
+            $('#Line_ID').attr('value', uid);
+            $('#ModalDelete').modal('show');
+        }
+    </script>
+{% endblock %}

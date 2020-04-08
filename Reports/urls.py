@@ -23,7 +23,7 @@ urlpatterns = [
     path('login/', views.login, name='login', ),
     path('logout/', views.logout, name='logout', ),
     path('report/create/', views.report_create, name='report_create', ),
-    path('report/<int:report_id>/', views.report_view, name='report_view', ),
+    path('report/<int:report_id>/show', views.report_show, name='report_show', ),
     path('report/<int:report_id>/total', views.report_total, name='report_total', ),
     path('report/<int:report_id>/download', views.report_download, name='report_download', ),
     path('report/<int:report_id>/edit', views.report_edit, name='report_edit', ),
@@ -31,7 +31,7 @@ urlpatterns = [
     path('report/<int:report_id>/publish', views.report_publish, name='report_publish', ),
     path('report/<int:report_id>/column/save/', views.column_save, name='column_save', ),
     path('report/<int:report_id>/cell/save/', views.cells_save, name='cells_save', ),
+    path('report/<int:report_id>/line/delete/', views.line_delete, name='linedelete', ),
     path('column/<int:column_id>/edit/', views.column_edit, name='column_edit', ),
     path('column/<int:column_id>/delete/', views.column_delete, name='column_delete', ),
-    path('line/<int:line_id>/delete/', views.line_delete, name='line_delete', ),
 ]

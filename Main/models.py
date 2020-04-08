@@ -17,7 +17,7 @@ class Reports(models.Model):
         return '{0}'.format(self.TitleShort)
 
     class Meta:
-        ordering = 'TitleShort',
+        ordering = '-Published', 'TitleShort',
         verbose_name = 'Отчет'
         verbose_name_plural = 'Отчеты'
         managed = True
@@ -35,7 +35,7 @@ class Columns(models.Model):
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
-        return '{0}'.format(self.Title)
+        return '{0}'.format(self.id)
 
     class Meta:
         ordering = 'Priority', 'CreateDate',
@@ -72,12 +72,9 @@ class Cells(models.Model):
                                  on_delete=models.CASCADE, )
     LineID = models.ForeignKey(Lines, verbose_name='Строка', null=False, related_name='LineID',
                                on_delete=models.CASCADE, )
-    Owner = models.ForeignKey(User, verbose_name='Владелец ячейки', null=True, related_name='Owner',
-                              on_delete=models.SET_NULL, )
-    CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
-        return '{0} - {1}'.format(self.ColumnID, self.Value)
+        return '{0}.{1} - {2}'.format(self.LineID.id, self.ColumnID.id, self.Value)
 
     class Meta:
         ordering = 'ColumnID', 'id',

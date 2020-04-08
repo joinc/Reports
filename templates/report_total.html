@@ -36,7 +36,7 @@
                     <tr>
                         <td>
                             {% if count > 1 %}
-                                <button class="btn btn-link p-0" id="czn{{ owner.id }}" type="submit">{{ owner.get_full_name }}</button>
+                                <button class="btn btn-link p-0" id="czn{{ owner.id }}">{{ owner.get_full_name }}</button>
                             {% else %}
                                 {{ owner.get_full_name }}
                             {% endif %}
@@ -44,22 +44,20 @@
                         {% for cell in cells %}
                             <td class="text-right">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
                         {% endfor %}
-                        <td><span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.Y" }}</span></td>
+                        <td><span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.y" }}</span></td>
                     </tr>
-                    <tbody class="czn{{ owner.id }}">
-                    </tbody>
-                    <script>
+                    <tbody id="czn{{ owner.id }}show"></tbody>
+                    <script type="text/javascript">
                         var czn{{ owner.id }}view = false;
                         $(document).ready(function () {
                             $('#czn{{ owner.id }}').click(function () {
                                 if(czn{{ owner.id }}view) {
                                     czn{{ owner.id }}view = false;
-                                    $('.czn{{ owner.id }}').empty();
-
+                                    $('#czn{{ owner.id }}show').empty();
                                 } else {
                                     czn{{ owner.id }}view = true;
                                     $.get(($(location).attr('href')), {czn: {{ owner.id }} }, function(data) {
-                                        $('.czn{{ owner.id }}').append(data);
+                                        $('#czn{{ owner.id }}show').append(data);
                                     });
                                 }
                             });

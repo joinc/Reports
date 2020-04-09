@@ -44,8 +44,8 @@
                     {% autoescape off %}{{ report.Header }}{% endautoescape %}
                     <tr>
                         <td>1</td>
-                        {% for column in column_list %}
-                            <td>{{ forloop.counter|add:1 }}</td>
+                        {% for column, form in column_list %}
+                            <td{% if column.Color > 0 %} class="bg-{{ column.get_Color_display }}"{% endif %}><small>{{ forloop.counter|add:1 }}</small></td>
                         {% endfor %}
                         <td>#</td>
                     </tr>
@@ -79,6 +79,10 @@
                                                     <div class="form-group">
                                                         <label class="col-form-label">Очередность:</label>
                                                         {{ form.column_priority }}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-form-label">Цвет столбца:</label>
+                                                        {{ form.column_color }}
                                                     </div>
                                                     <div class="form-group">
                                                         <label class="col-form-label">Тип данных:</label>
@@ -141,6 +145,10 @@
                                                 <div class="form-group">
                                                     <label class="col-form-label">Очередность:</label>
                                                     {{ column_form.column_priority }}
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Цвет столбца:</label>
+                                                    {{ column_form.column_color }}
                                                 </div>
                                                 <div class="form-group">
                                                     <label class="col-form-label">Тип данных:</label>

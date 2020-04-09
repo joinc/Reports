@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from .choices import TYPE_CHOICES, FORMULA_CHOICES
+from .choices import TYPE_CHOICES, FORMULA_CHOICES, COLOR_CHOICES
 
 
 ######################################################################################################################
@@ -30,6 +30,7 @@ class Columns(models.Model):
     ReportID = models.ForeignKey(Reports, verbose_name='Отчет', null=False, related_name='ColumnReportID',
                                  on_delete=models.CASCADE, )
     TypeData = models.SmallIntegerField('Тип данных', choices=TYPE_CHOICES, default=1, )
+    Color = models.SmallIntegerField('Цает столбца', choices=COLOR_CHOICES, default=0, )
     TotalFormula = models.SmallIntegerField('Формула итого', choices=FORMULA_CHOICES, default=1, )
     Priority = models.SmallIntegerField('Очередность столбцов', default=0, )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )

@@ -2,7 +2,7 @@
 
 from django import forms
 from datetime import date
-from .choices import TYPE_CHOICES, FORMULA_CHOICES
+from .choices import TYPE_CHOICES, FORMULA_CHOICES, COLOR_CHOICES
 
 ######################################################################################################################
 
@@ -59,6 +59,14 @@ class FormColumn(forms.Form):
         label='',
         widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите очередность столбца', }),
         required=False,
+    )
+
+    column_color = forms.ChoiceField(
+        choices=COLOR_CHOICES,
+        label='',
+        initial=0,
+        widget=forms.Select(attrs={'class': 'custom-select'}),
+        required=True
     )
 
     column_type = forms.ChoiceField(

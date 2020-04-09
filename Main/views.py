@@ -125,6 +125,7 @@ def report_edit(request, report_id):
         form = FormColumn(initial={
             'column_title': column.Title,
             'column_priority': column.Priority,
+            'column_color': column.Color,
             'column_type': column.TypeData,
             'column_total': column.TotalFormula,
         })
@@ -261,10 +262,12 @@ def column_save(request, report_id):
     if request.POST:
         column_title = request.POST['column_title']
         column_priority = request.POST['column_priority']
+        column_color = request.POST['column_color']
         column_type = request.POST['column_type']
         column = Columns()
         column.Title = column_title
         column.Priority = column_priority
+        column.Color = column_color
         column.TypeData = column_type
         column.ReportID = report
         column.save()
@@ -313,9 +316,11 @@ def column_edit(request, column_id):
     if request.POST:
         column_title = request.POST['column_title']
         column_priority = request.POST['column_priority']
+        column_color = request.POST['column_color']
         column_type = request.POST['column_type']
         column.Title = column_title
         column.Priority = column_priority
+        column.Color = column_color
         column.TypeData = column_type
     column.save()
     return redirect(reverse('report_edit', args=(column.ReportID.id,)))

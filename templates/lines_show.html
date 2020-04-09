@@ -3,7 +3,7 @@
         <tr>
             <td></td>
             {%  for cell in cells %}
-                <td class="text-right">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
+                <td class="text-right{% if cell.ColumnID.Color > 0 %} table-{{ cell.ColumnID.get_Color_display }}{% endif %}">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
             {% endfor %}
             <td class="flex-nowrap">
                 <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.y" }} </span>

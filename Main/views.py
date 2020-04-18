@@ -146,6 +146,7 @@ def report_show(request, report_id):
         report = get_object_or_404(Reports, id=report_id)
         if request.GET:
             context = {'table': lines_show(request, report)}
+            print(context)
             return render(request, 'lines_show.html', context)
         else:
             context = {'report': report, 'breadcrumb': 'Просмотр таблицы "' + report.TitleShort + '"', }
@@ -207,17 +208,19 @@ def report_download(request, report_id):
     data_field.append('Дата предоставления информации')
     data_ods = [data_field]
     for user in users_list:
-        data_field = [user.get_full_name()]
-        line = Lines.objects.filter(ReportID=report).filter(Editor=user).first()
-        for column in column_list:
-            cell = Cells.objects.filter(LineID=line).filter(ColumnID=column).first()
-            value = cell.Value
-            if isfloat(value):
-                value = float(value)
-                # value = float('{:.2f}'.format(value))
-            data_field.append(value)
-        data_field.append(line.CreateDate.strftime('%d-%m-%G'))
-        data_ods.append(data_field)
+        count = Lines.objects.filter(ReportID=report).filter(Editor=user).count()
+        if count > 0:
+            data_field = [user.get_full_name()]
+            line = Lines.objects.filter(ReportID=report).filter(Editor=user).first()
+            for column in column_list:
+                cell = Cells.objects.filter(LineID=line).filter(ColumnID=column).first()
+                value = cell.Value
+                if isfloat(value):
+                    value = float(value)
+                    # value = float('{:.2f}'.format(value))
+                data_field.append(value)
+            data_field.append(line.CreateDate.strftime('%d-%m-%G'))
+            data_ods.append(data_field)
     data_field = ['Итого:']
     for column in column_list:
         total = column_total(report, column, users_list)
@@ -370,7 +373,7 @@ def lines_show(request, report):
     table = []
     lines = Lines.objects.filter(ReportID=report).filter(Editor_id=czn)
     columns = Columns.objects.filter(ReportID=report)
-    for line in lines:
+    for line in lines[1:]:
         table.append([line, cells_fill(line, columns)])
     return table
 
@@ -394,7 +397,10 @@ def cells_fill(line, columns):
     for column in columns:
         cell = Cells.objects.filter(ColumnID=column.id).filter(LineID=line).first()
         if not cell:
-            cell_save(line, column, '')
+            if column.TypeData == 1:
+                cell_save(line, column, 0)
+            else:
+                cell_save(line, column, '')
     return Cells.objects.filter(LineID=line)
 
 

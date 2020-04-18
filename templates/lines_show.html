@@ -1,16 +1,16 @@
 {% for line, cells in table %}
-    {% if not forloop.first %}
-        <tr>
-            <td></td>
-            {%  for cell in cells %}
-                <td class="text-right{% if cell.ColumnID.Color > 0 %} table-{{ cell.ColumnID.get_Color_display }}{% endif %}">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
-            {% endfor %}
-            <td class="flex-nowrap">
-                <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.y" }} </span>
-                {% if not request.user.is_superuser %}
-                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="LineDelete('{{ line.id }}')" title="Удалить строку"><span class="fas fa-eraser" style="color: #ff6b6b;"></span></button>
-                {% endif %}
-            </td>
-        </tr>
-    {% endif %}
+    <tr>
+        {% if forloop.first %}
+            <td rowspan="{{ forloop.revcounter }}"></td>
+        {% endif %}
+        {%  for cell in cells %}
+            <td class="text-right{% if cell.ColumnID.Color > 0 %} table-{{ cell.ColumnID.get_Color_display }}{% endif %}">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
+        {% endfor %}
+        <td class="flex-nowrap">
+            <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.y" }} </span>
+            {% if not request.user.is_superuser %}
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="LineDelete('{{ line.id }}')" title="Удалить строку"><span class="fas fa-eraser" style="color: #ff6b6b;"></span></button>
+            {% endif %}
+        </td>
+    </tr>
 {% endfor %}

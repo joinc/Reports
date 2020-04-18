@@ -15,7 +15,7 @@
             <div class="col-auto">
                 {% if request.user.is_superuser %}
                     <a class="btn btn-outline-info" href="{% url 'report_download' report.id %}" role="button"><i class="fas fa-download"></i> Скачать</a>
-                    <a class="btn btn-outline-info" href="{% url 'report_edit' report.id %}" role="button"><i class="fas fa-edit"></i> Редактировать</a>
+                    <a class="btn btn-outline-secondary" href="{% url 'report_edit' report.id %}" role="button"><i class="fas fa-edit"></i> Редактировать</a>
                 {% endif %}
             </div>
         </div>

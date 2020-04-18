@@ -26,7 +26,12 @@
                     <span class="dropdown-item"><strong>{% firstof user.get_full_name user.get_short_name user.get_username %}</strong></span>
                     {% if request.user.is_superuser %}
                         <div class="dropdown-divider"></div>
-                        <a href="{% url 'report_create' %}" class="dropdown-item bg-danger text-white">Создать таблицу отчета</a>
+                        <a href="{% url 'report_create' %}" class="dropdown-item">
+                            <div class="row">
+                                <div class="col-auto mr-auto">Создать таблицу</div>
+                                <div class="col-auto text-right"><i class="fas fa-calendar-plus"></i></div>
+                            </div>
+                        </a>
                     {% endif %}
                     <div class="dropdown-divider"></div>
                     <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>

@@ -42,17 +42,17 @@
         </div>
         <div class="shadow p-3 mb-5 bg-white rounded">
             <h5>{{ report.TitleLong }}</h5>
-            <table class="table table-hover table-bordered">
+            <table class="table table-sm table-bordered">
                 <thead class="bg-info text-white">
                     {% autoescape off %}{{ report.Header }}{% endautoescape %}
-                    <tr>
-                        <td>1</td>
-                        {% for column, form in column_list %}
-                            <td{% if column.Color > 0 %} class="bg-{{ column.get_Color_display }}"{% endif %}><small>{{ forloop.counter|add:1 }}</small></td>
-                        {% endfor %}
-                        <td>#</td>
-                    </tr>
                 </thead>
+                <tr class="table-secondary">
+                    <td><small>1</small></td>
+                    {% for column, form in column_list %}
+                        <td{% if column.Color > 0 %} class="bg-{{ column.get_Color_display }}"{% endif %}><small>{{ forloop.counter|add:1 }}</small></td>
+                    {% endfor %}
+                    <td><small>#</small></td>
+                </tr>
                 <tbody>
                     <tr>
                         <td><small>Ответственное лицо</small></td>

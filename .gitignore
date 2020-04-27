@@ -10,3 +10,4 @@ Reports/__pycache__/
 Main/migrations/__init__.py
 Reports/settings.py
 db.sqlite3
+manage.py

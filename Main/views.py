@@ -321,10 +321,12 @@ def column_edit(request, column_id):
         column_priority = request.POST['column_priority']
         column_color = request.POST['column_color']
         column_type = request.POST['column_type']
+        column_formula = request.POST['column_total']
         column.Title = column_title
         column.Priority = column_priority
         column.Color = column_color
         column.TypeData = column_type
+        column.TotalFormula = column_formula
     column.save()
     return redirect(reverse('report_edit', args=(column.ReportID.id,)))
 

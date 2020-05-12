@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from django.db import models
 from django.contrib.auth.models import User
 from .choices import TYPE_CHOICES, FORMULA_CHOICES, COLOR_CHOICES

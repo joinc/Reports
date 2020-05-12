@@ -4,22 +4,24 @@ from datetime import datetime
 from pyexcel_ods3 import save_data
 from collections import OrderedDict
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.models import auth, User
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.core.serializers import serialize
 from Main.models import Reports, Columns, Lines, Cells
 from .forms import FormReportCreate, FormReportEdit, FormColumn
 import os
 import mimetypes
-
+import json
 
 ######################################################################################################################
 
 
 def superuser_only(function):
+    # Декоратор - выполняется только администратором
     def _inner(request, *args, **kwargs):
         if not request.user.is_superuser:
             return redirect(reverse('index'))
@@ -335,6 +337,21 @@ def column_edit(request, column_id):
 
 
 @login_required
+def line_show(request, line_id):
+    line = get_object_or_404(Lines, id=line_id)
+    data = serialize('json', Cells.objects.filter(LineID=line.id))
+    response_data = {
+        "user": line.Editor.get_full_name(),
+        "data": data
+    }
+    dump = json.dumps(response_data, ensure_ascii=False)
+    return HttpResponse(dump, content_type='application/json')
+
+
+######################################################################################################################
+
+
+@login_required
 def line_delete(request, report_id):
     # Удаление строки автором или администратором
     if request.POST:
@@ -396,13 +413,14 @@ def cell_save(cell_line, cell_column, cell_value):
 
 
 def cells_fill(line, columns):
-    for column in columns:
-        cell = Cells.objects.filter(ColumnID=column.id).filter(LineID=line).first()
-        if not cell:
-            if column.TypeData == 1:
-                cell_save(line, column, 0)
-            else:
-                cell_save(line, column, '')
+    if Columns.objects.filter(ReportID=line.ReportID).count() > Cells.objects.filter(LineID=line).count():
+        for column in Columns.objects.filter(ReportID=line.ReportID):
+            cell = Cells.objects.filter(ColumnID=column.id).filter(LineID=line.id).first()
+            if not cell:
+                if column.TypeData == 1:
+                    cell_save(line, column, 0)
+                else:
+                    cell_save(line, column, '')
     return Cells.objects.filter(LineID=line)
 
 

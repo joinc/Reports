@@ -10,12 +10,10 @@ from django.contrib import messages
 from django.contrib.auth.models import auth, User
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.core.serializers import serialize
 from Main.models import Reports, Columns, Lines, Cells
 from .forms import FormReportCreate, FormReportEdit, FormColumn
 import os
 import mimetypes
-import json
 
 ######################################################################################################################
 
@@ -167,6 +165,15 @@ def report_show(request, report_id):
 
 
 @superuser_only
+def report_total_count(request, report_id):
+
+    return redirect(reverse('report_total'))
+
+
+######################################################################################################################
+
+
+@superuser_only
 def report_total(request, report_id):
     report = get_object_or_404(Reports, id=report_id)
     if request.GET:
@@ -178,11 +185,14 @@ def report_total(request, report_id):
         column_list = Columns.objects.filter(ReportID=report)
         context['column_list'] = column_list
         data_list = []
+        totals = []
         total_list = []
         for column in column_list:
             total = column_total(report, column, users_list)
+            totals.append(column.TotalValue)
             total_list.append(total)
         context['total_list'] = total_list
+        context['totals'] = totals
         for owner in users_list:
             count = Lines.objects.filter(ReportID=report).filter(Editor=owner).count()
             if count > 0:
@@ -331,21 +341,6 @@ def column_edit(request, column_id):
         column.TotalFormula = column_formula
     column.save()
     return redirect(reverse('report_edit', args=(column.ReportID.id,)))
-
-
-######################################################################################################################
-
-
-@login_required
-def line_show(request, line_id):
-    line = get_object_or_404(Lines, id=line_id)
-    data = serialize('json', Cells.objects.filter(LineID=line.id))
-    response_data = {
-        "user": line.Editor.get_full_name(),
-        "data": data
-    }
-    dump = json.dumps(response_data, ensure_ascii=False)
-    return HttpResponse(dump, content_type='application/json')
 
 
 ######################################################################################################################

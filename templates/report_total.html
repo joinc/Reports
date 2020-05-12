@@ -68,15 +68,28 @@
                         });
                     </script>
                 {% endfor %}
-                <tbody>
-                    <tr class="table-secondary">
-                        <td>Итого:</td>
-                        {% for total in total_list %}
-                            <td class="text-right">{{ total|floatformat:2 }}</td>
-                        {% endfor %}
-                        <td></td>
-                    </tr>
-                </tbody>
+                {% if total_list %}
+                    <tbody>
+                        <tr class="table-secondary">
+                            <td>Итого:</td>
+                            {% for total in total_list %}
+                                <td class="text-right">{{ total|floatformat:2 }}</td>
+                            {% endfor %}
+                            <td></td>
+                        </tr>
+                    </tbody>
+                {% endif %}
+                {% if totals %}
+                    <tbody>
+                        <tr class="table-secondary">
+                            <td>Итого:</td>
+                            {% for column in column_list %}
+                                <td class="text-right">{{ column.TotalValue|floatformat:2 }}</td>
+                            {% endfor %}
+                            <td>Пересчитать</td>
+                        </tr>
+                    </tbody>
+                {% endif %}
             </table>
         </div>
     </div>

@@ -78,10 +78,10 @@ class Cells(models.Model):
                                on_delete=models.CASCADE, )
 
     def __str__(self):
-        return '{0}.{1} - {2}'.format(self.LineID.id, self.ColumnID.id, self.Value)
+        return '{0}:{1} - {2}'.format(self.LineID.id, self.ColumnID.id, self.Value)
 
     class Meta:
-        ordering = 'ColumnID', 'id',
+        ordering = 'ColumnID', '-id',
         verbose_name = 'Ячейка'
         verbose_name_plural = 'Ячейки'
         managed = True

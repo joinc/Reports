@@ -25,6 +25,7 @@ urlpatterns = [
     path('report/create/', views.report_create, name='report_create', ),
     path('report/<int:report_id>/show', views.report_show, name='report_show', ),
     path('report/<int:report_id>/total', views.report_total, name='report_total', ),
+    path('report/<int:report_id>/count', views.report_total_count, name='report_total_count', ),
     path('report/<int:report_id>/download', views.report_download, name='report_download', ),
     path('report/<int:report_id>/edit', views.report_edit, name='report_edit', ),
     path('report/<int:report_id>/save', views.report_save, name='report_save', ),

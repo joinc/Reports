@@ -146,7 +146,6 @@ def report_show(request, report_id):
         report = get_object_or_404(Reports, id=report_id)
         if request.GET:
             context = {'table': lines_show(request, report)}
-            print(context)
             return render(request, 'lines_show.html', context)
         else:
             context = {'report': report, 'breadcrumb': 'Просмотр таблицы "' + report.TitleShort + '"', }
@@ -157,7 +156,7 @@ def report_show(request, report_id):
             if count > 0:
                 line = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
                 context['line'] = line
-                context['cells'] = cells_fill(line, columns)
+                context['cells'] = cells_fill(line)
             return render(request, 'report_show.html', context)
 
 
@@ -166,8 +165,14 @@ def report_show(request, report_id):
 
 @superuser_only
 def report_total_count(request, report_id):
+    report = get_object_or_404(Reports, id=report_id)
+    users_list = User.objects.filter(is_superuser=False).order_by('last_name')
+    for column in Columns.objects.filter(ReportID=report):
+        total = column_total(report, column, users_list)
+        column.TotalValue = total
+        column.save()
 
-    return redirect(reverse('report_total'))
+    return redirect(reverse('report_total', args=(report_id,)))
 
 
 ######################################################################################################################
@@ -185,19 +190,11 @@ def report_total(request, report_id):
         column_list = Columns.objects.filter(ReportID=report)
         context['column_list'] = column_list
         data_list = []
-        totals = []
-        total_list = []
-        for column in column_list:
-            total = column_total(report, column, users_list)
-            totals.append(column.TotalValue)
-            total_list.append(total)
-        context['total_list'] = total_list
-        context['totals'] = totals
         for owner in users_list:
             count = Lines.objects.filter(ReportID=report).filter(Editor=owner).count()
             if count > 0:
                 line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
-                cells = cells_fill(line, column_list)
+                cells = cells_fill(line)
                 data_list.append([owner, count, cells, line])
         context['data_list'] = data_list
         return render(request, 'report_total.html', context)
@@ -235,8 +232,10 @@ def report_download(request, report_id):
             data_ods.append(data_field)
     data_field = ['Итого:']
     for column in column_list:
-        total = column_total(report, column, users_list)
-        data_field.append(total)
+        value = column.TotalValue
+        if isfloat(value):
+            value = float(value)
+        data_field.append(value)
     data_ods.append(data_field)
     data = OrderedDict()
     data.update({'Данные': data_ods})
@@ -305,17 +304,18 @@ def column_delete(request, column_id):
 
 
 def column_total(report, column, users_list):
-    if column.TypeData == 1:
+    if column.TotalFormula == 1:
         total = 0
         for user in users_list:
             line = Lines.objects.filter(ReportID=report).filter(Editor=user).first()
-            cell = Cells.objects.filter(LineID=line).filter(ColumnID=column).first()
-            if cell is not None:
-                try:
-                    cell_value = float(cell.Value)
-                except ValueError:
-                    cell_value = 0
-                total = total + cell_value
+            if line:
+                cell = Cells.objects.filter(LineID=line).filter(ColumnID=column).first()
+                if cell is not None:
+                    try:
+                        cell_value = float(cell.Value)
+                    except ValueError:
+                        cell_value = 0
+                    total = total + cell_value
         total = float('{:.2f}'.format(total))
         return total
     else:
@@ -365,6 +365,7 @@ def cells_save(request, report_id):
     report = get_object_or_404(Reports, id=report_id)
     if request.POST:
         column_list = Columns.objects.filter(ReportID=report)
+        last_line = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
         line = Lines()
         line.ReportID = report
         line.Editor = request.user
@@ -375,6 +376,8 @@ def cells_save(request, report_id):
                 cell_value = cell_value.replace(',', '.')
             else:
                 cell_value = ''
+            if column.TotalFormula == 1:
+                print(12+a)
             cell_save(line, column, cell_value)
     return redirect(reverse('report_show', args=(report.id,)))
 
@@ -386,9 +389,8 @@ def lines_show(request, report):
     czn = int(request.GET.get('czn'))
     table = []
     lines = Lines.objects.filter(ReportID=report).filter(Editor_id=czn)
-    columns = Columns.objects.filter(ReportID=report)
     for line in lines[1:]:
-        table.append([line, cells_fill(line, columns)])
+        table.append([line, cells_fill(line)])
     return table
 
 
@@ -407,8 +409,10 @@ def cell_save(cell_line, cell_column, cell_value):
 ######################################################################################################################
 
 
-def cells_fill(line, columns):
+def cells_fill(line):
+    print(Columns.objects.filter(ReportID=line.ReportID).count(), Cells.objects.filter(LineID=line).count())
     if Columns.objects.filter(ReportID=line.ReportID).count() > Cells.objects.filter(LineID=line).count():
+        print('1')
         for column in Columns.objects.filter(ReportID=line.ReportID):
             cell = Cells.objects.filter(ColumnID=column.id).filter(LineID=line.id).first()
             if not cell:

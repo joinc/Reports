@@ -11,6 +11,7 @@ from .choices import TYPE_CHOICES, FORMULA_CHOICES, COLOR_CHOICES
 class Reports(models.Model):
     TitleShort = models.CharField('Краткое наименование', max_length=64, default='', )
     TitleLong = models.CharField('Полное наименование', max_length=1024, default='', )
+    TitleFile = models.FileField('Файл с шапкой таблицы', upload_to='%Y/%m/%d', null=True, )
     Published = models.BooleanField('Опубликована', default=False, )
     Header = models.CharField('Заголовок таблицы', max_length=10240, default='', )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
@@ -58,7 +59,7 @@ class Lines(models.Model):
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
-        return '{0}.{1}'.format(self.Editor.get_full_name(), self.ReportID.TitleShort)
+        return '{0}.{1}'.format(self.ReportID.id, self.id)
 
     class Meta:
         ordering = 'Editor', '-CreateDate',

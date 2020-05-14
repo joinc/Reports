@@ -4,29 +4,17 @@ from datetime import datetime
 from pyexcel_ods3 import save_data
 from collections import OrderedDict
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.models import auth, User
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from Main.models import Reports, Columns, Lines, Cells
-from .forms import FormReportCreate, FormReportEdit, FormColumn
+from .tools import isfloat, save_cell, fill_cell
+from .decorators import superuser_only
 import os
 import mimetypes
-
-######################################################################################################################
-
-
-def superuser_only(function):
-    # Декоратор - выполняется только администратором
-    def _inner(request, *args, **kwargs):
-        if not request.user.is_superuser:
-            return redirect(reverse('index'))
-        return function(request, *args, **kwargs)
-
-    return _inner
-
 
 ######################################################################################################################
 
@@ -76,68 +64,6 @@ def logout(request):
 ######################################################################################################################
 
 
-@superuser_only
-def report_create(request):
-    if request.POST:
-        report_title_short = request.POST['report_title_short']
-        report_title_long = request.POST['report_title_long']
-        report = Reports()
-        report.TitleShort = report_title_short
-        report.TitleLong = report_title_long
-        report.save()
-        return redirect(reverse('report_edit', args=(report.id,)))
-    else:
-        context = {'report_form': FormReportCreate(), 'breadcrumb': 'Создание таблицы', }
-        return render(request, 'report_create.html', context)
-
-
-######################################################################################################################
-
-
-@superuser_only
-def report_save(request, report_id):
-    report = get_object_or_404(Reports, id=report_id)
-    if request.POST:
-        report_title_short = request.POST['report_title_short']
-        report_title_long = request.POST['report_title_long']
-        report_header = request.POST['report_header']
-        report.TitleShort = report_title_short
-        report.TitleLong = report_title_long
-        report.Header = report_header
-        report.save()
-        return redirect(reverse('report_edit', args=(report.id,)))
-    return redirect(reverse('index'))
-
-
-######################################################################################################################
-
-
-@superuser_only
-def report_edit(request, report_id):
-    report = get_object_or_404(Reports, id=report_id)
-    context = {'report': report, 'breadcrumb': 'Редактирование таблицы "' + report.TitleShort + '"',
-               'report_form': FormReportEdit(initial={'report_title_short': report.TitleShort,
-                                                      'report_title_long': report.TitleLong,
-                                                      'report_header': report.Header, })}
-    columns = Columns.objects.filter(ReportID=report)
-    column_list = []
-    for column in columns:
-        form = FormColumn(initial={
-            'column_title': column.Title,
-            'column_priority': column.Priority,
-            'column_color': column.Color,
-            'column_type': column.TypeData,
-            'column_total': column.TotalFormula,
-        })
-        column_list.append([column, form])
-    context['column_list'] = column_list
-    context['column_form'] = FormColumn()
-    return render(request, 'report_edit.html', context)
-
-
-######################################################################################################################
-
-
 @login_required
 def report_show(request, report_id):
     if request.user.is_superuser:
@@ -156,7 +82,7 @@ def report_show(request, report_id):
             if count > 0:
                 line = Lines.objects.filter(ReportID=report).filter(Editor=request.user).first()
                 context['line'] = line
-                context['cells'] = cells_fill(line)
+                context['cells'] = fill_cell(line)
             return render(request, 'report_show.html', context)
 
 
@@ -194,7 +120,7 @@ def report_total(request, report_id):
             count = Lines.objects.filter(ReportID=report).filter(Editor=owner).count()
             if count > 0:
                 line = Lines.objects.filter(ReportID=report).filter(Editor=owner).first()
-                cells = cells_fill(line)
+                cells = fill_cell(line)
                 data_list.append([owner, count, cells, line])
         context['data_list'] = data_list
         return render(request, 'report_total.html', context)
@@ -257,20 +183,6 @@ def report_download(request, report_id):
 
 
 @superuser_only
-def report_publish(request, report_id):
-    report = get_object_or_404(Reports, id=report_id)
-    if not report.Published:
-        report.Published = True
-    else:
-        report.Published = False
-    report.save()
-    return redirect(reverse('index'))
-
-
-######################################################################################################################
-
-
-@superuser_only
 def column_save(request, report_id):
     report = get_object_or_404(Reports, id=report_id)
     if request.POST:
@@ -293,11 +205,21 @@ def column_save(request, report_id):
 
 
 @superuser_only
-def column_delete(request, column_id):
+def column_edit(request, column_id):
     column = get_object_or_404(Columns, id=column_id)
-    report_id = column.ReportID.id
-    column.delete()
-    return redirect(reverse('report_edit', args=(report_id,)))
+    if request.POST:
+        column_title = request.POST['column_title']
+        column_priority = request.POST['column_priority']
+        column_color = request.POST['column_color']
+        column_type = request.POST['column_type']
+        column_formula = request.POST['column_total']
+        column.Title = column_title
+        column.Priority = column_priority
+        column.Color = column_color
+        column.TypeData = column_type
+        column.TotalFormula = column_formula
+    column.save()
+    return redirect(reverse('report_edit', args=(column.ReportID.id,)))
 
 
 ######################################################################################################################
@@ -326,21 +248,11 @@ def column_total(report, column, users_list):
 
 
 @superuser_only
-def column_edit(request, column_id):
+def column_delete(request, column_id):
     column = get_object_or_404(Columns, id=column_id)
-    if request.POST:
-        column_title = request.POST['column_title']
-        column_priority = request.POST['column_priority']
-        column_color = request.POST['column_color']
-        column_type = request.POST['column_type']
-        column_formula = request.POST['column_total']
-        column.Title = column_title
-        column.Priority = column_priority
-        column.Color = column_color
-        column.TypeData = column_type
-        column.TotalFormula = column_formula
-    column.save()
-    return redirect(reverse('report_edit', args=(column.ReportID.id,)))
+    report_id = column.ReportID.id
+    column.delete()
+    return redirect(reverse('report_edit', args=(report_id,)))
 
 
 ######################################################################################################################
@@ -360,6 +272,18 @@ def line_delete(request, report_id):
 ######################################################################################################################
 
 
+def lines_show(request, report):
+    czn = int(request.GET.get('czn'))
+    table = []
+    lines = Lines.objects.filter(ReportID=report).filter(Editor_id=czn)
+    for line in lines[1:]:
+        table.append([line, fill_cell(line)])
+    return table
+
+
+######################################################################################################################
+
+
 @login_required
 def cells_save(request, report_id):
     report = get_object_or_404(Reports, id=report_id)
@@ -371,67 +295,14 @@ def cells_save(request, report_id):
         line.Editor = request.user
         line.save()
         for column in column_list:
-            cell_value = request.POST['column' + column.id.__str__()]
-            if cell_value:
-                cell_value = cell_value.replace(',', '.')
-            else:
-                cell_value = ''
-            if column.TotalFormula == 1:
-                print(12+a)
-            cell_save(line, column, cell_value)
+            cell_value = request.POST.get('column' + column.id.__str__(), '')
+            if cell_value != '':
+                print('Есть значение')
+                if column.TotalFormula == 1:
+                    cell_value = cell_value.replace(',', '.')
+            print(cell_value)
+            save_cell(line, column, cell_value)
     return redirect(reverse('report_show', args=(report.id,)))
-
-
-######################################################################################################################
-
-
-def lines_show(request, report):
-    czn = int(request.GET.get('czn'))
-    table = []
-    lines = Lines.objects.filter(ReportID=report).filter(Editor_id=czn)
-    for line in lines[1:]:
-        table.append([line, cells_fill(line)])
-    return table
-
-
-######################################################################################################################
-
-
-def cell_save(cell_line, cell_column, cell_value):
-    # Процедура создания и заполнения значением новой ячейки
-    cell = Cells()
-    cell.LineID = cell_line
-    cell.ColumnID = cell_column
-    cell.Value = cell_value
-    cell.save()
-
-
-######################################################################################################################
-
-
-def cells_fill(line):
-    print(Columns.objects.filter(ReportID=line.ReportID).count(), Cells.objects.filter(LineID=line).count())
-    if Columns.objects.filter(ReportID=line.ReportID).count() > Cells.objects.filter(LineID=line).count():
-        print('1')
-        for column in Columns.objects.filter(ReportID=line.ReportID):
-            cell = Cells.objects.filter(ColumnID=column.id).filter(LineID=line.id).first()
-            if not cell:
-                if column.TypeData == 1:
-                    cell_save(line, column, 0)
-                else:
-                    cell_save(line, column, '')
-    return Cells.objects.filter(LineID=line)
-
-
-######################################################################################################################
-
-
-def isfloat(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
 
 
 ######################################################################################################################

@@ -1,48 +1,42 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from datetime import date
 from .choices import TYPE_CHOICES, FORMULA_CHOICES, COLOR_CHOICES
 
-######################################################################################################################
-
-
-class FormReportCreate(forms.Form):
-
-    report_title_short = forms.CharField(
-        label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите краткое наименование', }),
-        required=True,
-    )
-
-    report_title_long = forms.CharField(
-        label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите полное наименование', }),
-        required=True,
-    )
 
 ######################################################################################################################
 
 
-class FormReportEdit(forms.Form):
+class FormReport(forms.Form):
 
     report_title_short = forms.CharField(
-        label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите краткое наименование', }),
+        label='Краткое наименование:',
+        widget=forms.TextInput(attrs={
+            'type': 'text', 'class': 'form-control', 'placeholder': 'Введите краткое наименование',
+        }),
         required=True,
     )
 
     report_title_long = forms.CharField(
-        label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите полное наименование', }),
+        label='Полное наименование:',
+        widget=forms.Textarea(attrs={
+            'type': 'text', 'class': 'form-control', 'placeholder': 'Введите полное наименование', 'rows': 3,
+        }),
         required=True,
     )
 
-    report_header = forms.CharField(
-        label='',
+    report_title_file = forms.FileField(
+        label='Файл с заголовком таблицы в формате ods:',
+        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
+        required=False,
+    )
+
+    report_title_header = forms.CharField(
+        label='Заголовок таблицы:',
         widget=forms.Textarea(attrs={'type': 'text', 'class': 'form-control', 'rows': 3, }),
         required=False,
     )
+
 
 ######################################################################################################################
 
@@ -51,13 +45,17 @@ class FormColumn(forms.Form):
 
     column_title = forms.CharField(
         label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите наименование столбца', }),
+        widget=forms.TextInput(attrs={
+            'type': 'text', 'class': 'form-control', 'placeholder': 'Введите наименование столбца',
+        }),
         required=False,
     )
 
     column_priority = forms.CharField(
         label='',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Введите очередность столбца', }),
+        widget=forms.TextInput(attrs={
+            'type': 'text', 'class': 'form-control', 'placeholder': 'Введите очередность столбца',
+        }),
         required=False,
     )
 

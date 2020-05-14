@@ -55,32 +55,37 @@
                     </tr>
                     </tbody>
                     <tbody id="czn{{ user.id }}"></tbody>
-                    <tbody>
-                    <tr>
-                        <form method='post' action='{% url 'cells_save' report.id %}'>
-                            {% csrf_token %}
-                            <td>Добавить значения:</td>
-                            {% for cell in cells %}
-                                <td><input type="text" class="form-control text-right" name="column{{ cell.ColumnID.id }}" {% ifequal cell.ColumnID.TypeData 1 %}id="numeric" value="{{ cell.Value|floatformat:2 }}"{% else %}value="{{ cell.Value }}"{% endifequal %} required></td>
-                            {% endfor %}
-                            <td><button class="btn btn-success" type="submit">Сохранить</button></td>
-                        </form>
-                    </tr>
-                    </tbody>
-                {% else %}
-                    <tbody>
-                    <tr>
-                        <form method='post' action='{% url 'cells_save' report.id %}'>
-                            {% csrf_token %}
-                            <td>Добавить значения:</td>
-                            {% for column in columns %}
-                                <td><input type="text" class="form-control text-right" name="column{{ column.id }}" {% ifequal column.TypeData 1 %}id="numeric"{% endifequal %}></td>
-                            {% endfor %}
-                            <td><button class="btn btn-success" type="submit">Сохранить</button></td>
-                        </form>
-                    </tr>
-                    </tbody>
                 {% endif %}
+                <tbody>
+                <tr>
+                    <form method='post' action='{% url 'cells_save' report.id %}'>
+                        {% csrf_token %}
+                        <td>Добавить значения:</td>
+                        {% if count > 0 %}
+                            {% for cell in cells %}
+                                <td>
+                                    {% if cell.ColumnID.TypeData == 1 %}
+                                        <input type="text" class="form-control text-right" name="column{{ cell.ColumnID.id }}" id="numeric" value="{{ cell.Value|floatformat:2 }}">
+                                    {% else %}
+                                        <input type="text" class="form-control" name="column{{ cell.ColumnID.id }}" value="{{ cell.Value }}">
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        {% else %}
+                            {% for column in columns %}
+                                <td>
+                                    {% if column.TypeData == 1 %}
+                                        <input type="text" class="form-control text-right" name="column{{ column.id }}" id="numeric">
+                                    {% else %}
+                                        <input type="text" class="form-control" name="column{{ column.id }}">
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        {% endif %}
+                        <td><button class="btn btn-success" type="submit">Сохранить</button></td>
+                    </form>
+                </tr>
+                </tbody>
             </table>
         </div>
         <div class="shadow p-3 mb-5 bg-white rounded">

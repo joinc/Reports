@@ -13,27 +13,40 @@
                 </ol>
             </div>
             <div class="col-auto">
+                {% if report.Published %}
+                    <a href="{% url 'report_publish' report.id %}" class="btn btn-outline-danger">Снять с публикации</a>
+                {% else %}
+                    <a href="{% url 'report_publish' report.id %}" class="btn btn-success">Опубликовать</a>
+                {% endif %}
                 <a class="btn btn-outline-info" href="{% url 'report_total' report.id %}" role="button"><i class="fas fa-eye"></i></i> Перейти</a>
             </div>
         </div>
         <div class="shadow p-3 mb-5 bg-white rounded">
-            <form method='post' action='{% url 'report_save' report.id %}'>
+            <form method='post' action='{% url 'report_save' report.id %}' enctype='multipart/form-data'>
                 <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Краткое наименование:</label>
+                    <label class="col-sm-2 col-form-label">{{ report_form.report_title_short.label }}</label>
                     <div class="col-sm-10">
                         {{ report_form.report_title_short }}
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Полное наименование:</label>
+                    <label class="col-sm-2 col-form-label">{{ report_form.report_title_long.label }}</label>
                     <div class="col-sm-10">
                         {{ report_form.report_title_long }}
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-sm-2 col-form-label">Заголовок (<a href="http://www.apsolyamov.ru/files/html-table-generator.html" target="_blank">Генератор</a>):</label>
+                    <label class="col-sm-2 col-form-label">{{ report_form.report_title_file.label }}</label>
                     <div class="col-sm-10">
-                        {{ report_form.report_header }}
+                        {{ report_form.report_title_file }}
+                        {% if report.TitleFile %}На данный момент: <a href="{{ report.TitleFile.url }}">{{ report.TitleFile.name }}</a>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">{{ report_form.report_title_header.label }}(<a href="http://www.apsolyamov.ru/files/html-table-generator.html" target="_blank">Генератор</a>)</label>
+                    <div class="col-sm-10">
+                        {{ report_form.report_title_header }}
                     </div>
                 </div>
                 {% csrf_token %}

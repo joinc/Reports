@@ -4,7 +4,11 @@
             <td rowspan="{{ forloop.revcounter }}"></td>
         {% endif %}
         {%  for cell in cells %}
-            <td class="text-right{% if cell.ColumnID.Color > 0 %} table-{{ cell.ColumnID.get_Color_display }}{% endif %}">{% ifequal cell.ColumnID.TypeData 1 %}{{ cell.Value|floatformat:2 }}{% else %}{{ cell.Value }}{% endifequal %}</td>
+            {% if cell.ColumnID.TypeData == 1 %}
+                <td class="text-right{% if cell.ColumnID.Color > 0 %} table-{{ cell.ColumnID.get_Color_display }}{% endif %}">{{ cell.Value|floatformat:2 }}</td>
+            {% else %}
+                <td class="text-left{% if cell.ColumnID.Color > 0 %} table-{{ cell.ColumnID.get_Color_display }}{% endif %}">{{ cell.Value }}</td>
+            {% endif %}
         {% endfor %}
         <td class="flex-nowrap">
             <span title="{{ line.CreateDate }}">{{ line.CreateDate|date:"d.m.y" }} </span>

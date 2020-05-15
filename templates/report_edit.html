@@ -18,7 +18,7 @@
                 {% else %}
                     <a href="{% url 'report_publish' report.id %}" class="btn btn-success">Опубликовать</a>
                 {% endif %}
-                <a class="btn btn-outline-info" href="{% url 'report_total' report.id %}" role="button"><i class="fas fa-eye"></i></i> Перейти</a>
+                <a class="btn btn-outline-info" href="{% url 'report_show_total' report.id %}" role="button"><i class="fas fa-eye"></i></i> Перейти</a>
             </div>
         </div>
         <div class="shadow p-3 mb-5 bg-white rounded">

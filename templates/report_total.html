@@ -74,7 +74,7 @@
                     {% for column in column_list %}
                         <td class="text-right">{{ column.TotalValue|floatformat:2 }}</td>
                     {% endfor %}
-                    <td><a class="btn btn-sm btn-outline-success" href="{% url 'report_total_count' report.id %}" role="button">Пересчитать</a></td>
+                    <td><a class="btn btn-sm btn-outline-success" href="{% url 'report_count_total' report.id %}" role="button">Пересчитать</a></td>
                 </tr>
                 </tbody>
             </table>

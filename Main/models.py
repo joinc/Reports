@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from .choices import TYPE_CHOICES, FORMULA_CHOICES, COLOR_CHOICES
 
-
 ######################################################################################################################
 
 
@@ -24,6 +23,7 @@ class Reports(models.Model):
         verbose_name = 'Отчет'
         verbose_name_plural = 'Отчеты'
         managed = True
+
 
 ######################################################################################################################
 
@@ -48,6 +48,7 @@ class Columns(models.Model):
         verbose_name_plural = 'Столбцы'
         managed = True
 
+
 ######################################################################################################################
 
 
@@ -66,6 +67,7 @@ class Lines(models.Model):
         verbose_name = 'Строка'
         verbose_name_plural = 'Строки'
         managed = True
+
 
 ######################################################################################################################
 
@@ -86,5 +88,6 @@ class Cells(models.Model):
         verbose_name = 'Ячейка'
         verbose_name_plural = 'Ячейки'
         managed = True
+
 
 ######################################################################################################################

@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
-from Main import views, report
+from Main import views, report, column
 
 urlpatterns = [
     path('', views.index, name='index', ),
@@ -28,15 +28,15 @@ urlpatterns = [
     path('report/<int:report_id>/edit', report.report_edit, name='report_edit', ),
     path('report/<int:report_id>/save', report.report_save, name='report_save', ),
     path('report/<int:report_id>/publish', report.report_publish, name='report_publish', ),
-    path('report/<int:report_id>/show', views.report_show, name='report_show', ),
-    path('report/<int:report_id>/total', views.report_total, name='report_total', ),
-    path('report/<int:report_id>/count', views.report_total_count, name='report_total_count', ),
-    path('report/<int:report_id>/download', views.report_download, name='report_download', ),
-    path('report/<int:report_id>/column/save/', views.column_save, name='column_save', ),
+    path('report/<int:report_id>/show', report.report_show, name='report_show', ),
+    path('report/<int:report_id>/total', report.report_show_total, name='report_show_total', ),
+    path('report/<int:report_id>/count', report.report_count_total, name='report_count_total', ),
+    path('report/<int:report_id>/download', report.report_download, name='report_download', ),
     path('report/<int:report_id>/cell/save/', views.cells_save, name='cells_save', ),
-    path('report/<int:report_id>/line/delete/', views.line_delete, name='linedelete', ),
-    path('column/<int:column_id>/edit/', views.column_edit, name='column_edit', ),
-    path('column/<int:column_id>/delete/', views.column_delete, name='column_delete', ),
+    path('report/<int:report_id>/line/delete/', views.line_delete, name='line_delete', ),
+    path('report/<int:report_id>/column/save/', column.column_save, name='column_save', ),
+    path('column/<int:column_id>/edit/', column.column_edit, name='column_edit', ),
+    path('column/<int:column_id>/delete/', column.column_delete, name='column_delete', ),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

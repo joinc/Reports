@@ -2,9 +2,9 @@
 
 import os
 import mimetypes
+import openpyxl
 from datetime import datetime
-from pyexcel_ods3 import save_data
-from collections import OrderedDict
+from shutil import copyfile
 from django.http import HttpResponse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
@@ -53,6 +53,7 @@ def report_edit(request, report_id):
             'column_color': column.Color,
             'column_type': column.TypeData,
             'column_total': column.TotalFormula,
+            'column_value': column.TotalValue,
         })
         column_list.append([column, form])
     context['column_list'] = column_list
@@ -161,13 +162,21 @@ def report_download(request, report_id):
     users_list = User.objects.filter(is_superuser=False).order_by('last_name')
     column_list = Columns.objects.filter(ReportID=report)
     now = datetime.now()
-    file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
+    file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.xlsx'
+    filepath = os.path.join(settings.MEDIA_ROOT, file_name)
     file = settings.EXPORT_FILE + file_name
-    data_field = ['Центр занятости']
-    for column in column_list:
-        data_field.append(column.Title)
-    data_field.append('Дата предоставления информации')
-    data_ods = [data_field]
+    if report.TitleFile:
+        copyfile(report.TitleFile.path, filepath)
+        wb = openpyxl.load_workbook(filepath)
+        sheet = wb.active
+    else:
+        wb = openpyxl.Workbook()
+        sheet = wb.active
+        data_field = ['Центр занятости']
+        for column in column_list:
+            data_field.append(column.Title)
+        data_field.append('Дата предоставления информации')
+        sheet.append(data_field)
     for user in users_list:
         count = Lines.objects.filter(ReportID=report).filter(Editor=user).count()
         if count > 0:
@@ -181,17 +190,15 @@ def report_download(request, report_id):
                     # value = float('{:.2f}'.format(value))
                 data_field.append(value)
             data_field.append(line.CreateDate.strftime('%d-%m-%G'))
-            data_ods.append(data_field)
+            sheet.append(data_field)
     data_field = ['Итого:']
     for column in column_list:
         value = column.TotalValue
         if isfloat(value):
             value = float(value)
         data_field.append(value)
-    data_ods.append(data_field)
-    data = OrderedDict()
-    data.update({'Данные': data_ods})
-    save_data(file, data)
+    sheet.append(data_field)
+    wb.save(filepath)
     fp = open(file, 'rb')
     response = HttpResponse(fp.read())
     fp.close()
@@ -203,5 +210,6 @@ def report_download(request, report_id):
     response['Content-Disposition'] = "attachment; filename=" + file_name
     os.remove(file)
     return response
+
 
 ######################################################################################################################

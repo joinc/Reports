@@ -69,9 +69,20 @@ def line_delete(request, report_id):
                 first_line = Lines.objects.filter(ReportID=line.ReportID).filter(Editor=request.user).first()
                 if line.id == first_line.id:
                     second_line = Lines.objects.filter(ReportID=line.ReportID).filter(Editor=request.user)[1]
-                    print(line)
-                    print(first_line)
-                    print(second_line)
+                    for column in column_list:
+                        if column.TotalFormula == 1:
+                            first_cell = Cells.objects.filter(ColumnID=column.id).filter(LineID=first_line.id).first()
+                            second_cell = Cells.objects.filter(ColumnID=column.id).filter(LineID=second_line.id).first()
+                            if isfloat(first_cell.Value):
+                                if isfloat(second_cell.Value):
+                                    column.TotalValue = str(float(column.TotalValue) - float(first_cell.Value)
+                                                            + float(second_cell.Value))
+                                else:
+                                    column.TotalValue = str(float(column.TotalValue) - float(first_cell.Value))
+                            else:
+                                if isfloat(second_cell.Value):
+                                    column.TotalValue = str(float(column.TotalValue) + float(second_cell.Value))
+                            column.save()
             else:
                 for column in column_list:
                     if column.TotalFormula == 1:
@@ -79,7 +90,6 @@ def line_delete(request, report_id):
                         if isfloat(cell.Value):
                             column.TotalValue = str(float(column.TotalValue) - float(cell.Value))
                             column.save()
-            # pass
             line.delete()
     return redirect(reverse('report_show', args=(report_id,)))
 
@@ -100,7 +110,10 @@ def cells_save(request, report_id):
         for column in column_list:
             if column.TypeData == 1:
                 cell_value = request.POST.get('column' + column.id.__str__(), 0)
-                cell_value = cell_value.replace(',', '.')
+                if cell_value == '':
+                    cell_value = 0
+                else:
+                    cell_value = cell_value.replace(',', '.')
             else:
                 cell_value = request.POST.get('column' + column.id.__str__(), '')
             save_cell(line, column, cell_value)

@@ -44,7 +44,7 @@ class FormReport(forms.Form):
 class FormColumn(forms.Form):
 
     column_title = forms.CharField(
-        label='',
+        label='Наименование столбца:',
         widget=forms.TextInput(attrs={
             'type': 'text', 'class': 'form-control', 'placeholder': 'Введите наименование столбца',
         }),
@@ -52,7 +52,7 @@ class FormColumn(forms.Form):
     )
 
     column_priority = forms.CharField(
-        label='',
+        label='Очередность:',
         widget=forms.TextInput(attrs={
             'type': 'text', 'class': 'form-control', 'placeholder': 'Введите очередность столбца',
         }),
@@ -61,7 +61,7 @@ class FormColumn(forms.Form):
 
     column_color = forms.ChoiceField(
         choices=COLOR_CHOICES,
-        label='',
+        label='Цвет столбца:',
         initial=0,
         widget=forms.Select(attrs={'class': 'custom-select'}),
         required=True
@@ -69,7 +69,7 @@ class FormColumn(forms.Form):
 
     column_type = forms.ChoiceField(
         choices=TYPE_CHOICES,
-        label='',
+        label='Тип данных:',
         initial=1,
         widget=forms.Select(attrs={'class': 'custom-select'}),
         required=True
@@ -77,8 +77,19 @@ class FormColumn(forms.Form):
 
     column_total = forms.ChoiceField(
         choices=FORMULA_CHOICES,
-        label='',
+        label='Формула значения итого:',
         initial=1,
         widget=forms.Select(attrs={'class': 'custom-select'}),
         required=True
     )
+
+    column_value = forms.CharField(
+        label='Значение итого:',
+        widget=forms.TextInput(attrs={
+            'type': 'text', 'class': 'form-control',
+        }),
+        required=False
+    )
+
+
+######################################################################################################################

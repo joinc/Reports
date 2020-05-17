@@ -89,15 +89,15 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="form-group">
-                                                        <label class="col-form-label">Наименование столбца:</label>
+                                                        <label class="col-form-label">{{ form.column_title.label }}</label>
                                                         {{ form.column_title }}
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="col-form-label">Очередность:</label>
+                                                        <label class="col-form-label">{{ form.column_priority.label }}</label>
                                                         {{ form.column_priority }}
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="col-form-label">Цвет столбца:</label>
+                                                        <label class="col-form-label">{{ form.column_color.label }}</label>
                                                         <div class="row mb-2">
                                                             <div class="col">default</div>
                                                             <div class="col table-primary">primary</div>
@@ -109,12 +109,16 @@
                                                         {{ form.column_color }}
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="col-form-label">Тип данных:</label>
+                                                        <label class="col-form-label">{{ form.column_type.label }}</label>
                                                         {{ form.column_type }}
                                                     </div>
                                                     <div class="form-group">
-                                                        <label class="col-form-label">Формула значения итого:</label>
+                                                        <label class="col-form-label">{{ form.column_total.label }}</label>
                                                         {{ form.column_total }}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-form-label">{{ form.column_value.label }}</label>
+                                                        {{ form.column_value }}
                                                     </div>
                                                     {% csrf_token %}
                                                 </div>
@@ -155,6 +159,7 @@
                                 <div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
                                         <form method='post' action='{% url 'column_save' report.id %}'>
+                                            {% csrf_token %}
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="ModalDeleteTitle">Добавление столбца данных</h5>
                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
@@ -163,15 +168,15 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div class="form-group">
-                                                    <label class="col-form-label">Наименование столбца:</label>
+                                                    <label class="col-form-label">{{ column_form.column_title.label }}</label>
                                                     {{ column_form.column_title }}
                                                 </div>
                                                 <div class="form-group">
-                                                    <label class="col-form-label">Очередность:</label>
+                                                    <label class="col-form-label">{{ column_form.column_priority.label }}</label>
                                                     {{ column_form.column_priority }}
                                                 </div>
                                                 <div class="form-group">
-                                                    <label class="col-form-label">Цвет столбца:</label>
+                                                    <label class="col-form-label">{{ column_form.column_color.label }}</label>
                                                     <div class="row mb-2">
                                                         <div class="col">default</div>
                                                         <div class="col table-primary">primary</div>
@@ -183,14 +188,13 @@
                                                     {{ column_form.column_color }}
                                                 </div>
                                                 <div class="form-group">
-                                                    <label class="col-form-label">Тип данных:</label>
+                                                    <label class="col-form-label">{{ column_form.column_type.label }}</label>
                                                     {{ column_form.column_type }}
                                                 </div>
                                                 <div class="form-group">
-                                                    <label class="col-form-label">Формула значения итого:</label>
+                                                    <label class="col-form-label">{{ column_form.column_total.label }}</label>
                                                     {{ column_form.column_total }}
                                                 </div>
-                                                {% csrf_token %}
                                             </div>
                                             <div class="modal-footer">
                                                 <button class="btn btn-success" type="submit">Добавить</button>

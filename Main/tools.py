@@ -35,6 +35,7 @@ def save_column(request, report, column):
     column.Color = request.POST.get('column_color', 0)
     column.TypeData = request.POST.get('column_type', 2)
     column.TotalFormula = request.POST.get('column_total', 0)
+    column.TotalValue = request.POST.get('column_value', 0)
     column.ReportID = report
     column.save()
 

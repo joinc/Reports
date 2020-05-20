@@ -2,7 +2,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
-from .choices import TYPE_CHOICES, FORMULA_CHOICES, COLOR_CHOICES
+from .choices import TYPE_CHOICES, FORMULA_CHOICES, COLOR_CHOICES, EVENT_CHOICES
 
 ######################################################################################################################
 
@@ -57,6 +57,10 @@ class Lines(models.Model):
                                  on_delete=models.CASCADE, )
     Editor = models.ForeignKey(User, verbose_name='Редактор строки', null=True, related_name='Editor',
                                on_delete=models.SET_NULL, )
+    Prev = models.ForeignKey('self', verbose_name='Предыдущая строка', null=True, related_name='PrevLineID',
+                             on_delete=models.SET_DEFAULT, default=None, )
+    Current = models.BooleanField('Текущая строка', default=True, )
+    Deleted = models.BooleanField('Удаленная строка', default=False, )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
@@ -87,6 +91,25 @@ class Cells(models.Model):
         ordering = 'ColumnID', '-id',
         verbose_name = 'Ячейка'
         verbose_name_plural = 'Ячейки'
+        managed = True
+
+
+######################################################################################################################
+
+
+class Logs(models.Model):
+    event = models.SmallIntegerField('Событие', choices=EVENT_CHOICES, default=0, null=False, blank=False, )
+    participan = models.ForeignKey(User, verbose_name='Субъект события', null=True, related_name='Participan',
+                                   on_delete=models.SET_NULL, )
+    event_date = models.DateTimeField('Дата события', auto_now_add=True, null=True, )
+
+    def __str__(self):
+        return '{0}'.format(self.event_date)
+
+    class Meta:
+        ordering = '-event_date',
+        verbose_name = 'Логи'
+        verbose_name_plural = 'Логи'
         managed = True
 
 
